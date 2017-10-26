@@ -168,7 +168,6 @@ int main(int argc, char** argv)
 
   // Business logic must be implemented at this point
 
-
   int fd_input_file = open(bin_file_param, O_RDONLY);
   handleError(fd_input_file == -1, "Erreur d'ouverture du fichier");
   printf("%s", "file reversed : \n");
