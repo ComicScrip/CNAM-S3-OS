@@ -13,7 +13,8 @@
 #include<errno.h>
 
 #include<getopt.h>
-
+#include <fcntl.h>
+#include <unistd.h>
 
 #define STDOUT 1
 #define STDERR 2
@@ -23,10 +24,8 @@
 
 #define USAGE_SYNTAX "[OPTIONS] -i INPUT -o OUTPUT"
 #define USAGE_PARAMS "OPTIONS:\n\
-  -i, --input  INPUT_FILE  : input file\n\
-  -o, --output OUTPUT_FILE : output file\n\
+  -f, --filename  INPUT_FILE  : input file\n\
 ***\n\
-  -v, --verbose : enable *verbose* mode\n\
   -h, --help    : display this help\n\
 "
 
@@ -52,7 +51,7 @@ void print_usage(char* bin_name)
  */
 void free_if_needed(void* to_free)
 {
-  if (to_free != NULL) free(to_free);  
+  if (to_free != NULL) free(to_free);
 }
 
 
@@ -69,9 +68,9 @@ char* dup_optarg_str()
   if (optarg != NULL)
   {
     str = strndup(optarg, MAX_PATH_LENGTH);
-    
+
     // Checking if ERRNO is set
-    if (str == NULL) 
+    if (str == NULL)
       perror(strerror(errno));
   }
 
@@ -86,29 +85,33 @@ char* dup_optarg_str()
  * \see man 3 getopt_long or getopt
  * \see struct option definition
  */
-static struct option binary_opts[] = 
+static struct option binary_opts[] =
 {
   { "help",    no_argument,       0, 'h' },
-  { "verbose", no_argument,       0, 'v' },
-  { "input",   required_argument, 0, 'i' },
-  { "output",  required_argument, 0, 'o' },
-  { 0,         0,                 0,  0  } 
+  { "filename",   required_argument, 0, 'f' },
+  { 0,         0,                 0,  0  }
 };
 
-/**
+/** <fcntl.h>
  * Binary options string
  * (linked to optionn declaration)
  *
  * \see man 3 getopt_long or getopt
- */ 
+ */
 const char* binary_optstr = "hvi:o:";
 
-
+/* Fonction permettant de gerer les cas d'erreur */
+void handleError(int check, char * msg) {
+    if(check) {
+        perror(msg);
+        exit(EXIT_FAILURE);
+    }
+}
 
 /**
  * Binary main loop
  *
- * \return 1 if it exit successfully 
+ * \return 1 if it exit successfully
  */
 int main(int argc, char** argv)
 {
@@ -116,9 +119,7 @@ int main(int argc, char** argv)
    * Binary variables
    * (could be defined in a structure)
    */
-  short int is_verbose_mode = 0;
-  char* bin_input_param = NULL;
-  char* bin_output_param = NULL;
+  char* bin_file_param = NULL;
 
   // Parsing options
   int opt = -1;
@@ -128,67 +129,64 @@ int main(int argc, char** argv)
   {
     switch (opt)
     {
-      case 'i':
+      case 'f':
         //input param
         if (optarg)
         {
-          bin_input_param = dup_optarg_str();         
+          bin_file_param = dup_optarg_str();
         }
-        break;
-      case 'o':
-        //output param
-        if (optarg)
-        {
-          bin_output_param = dup_optarg_str();
-        }
-        break;
-      case 'v':
-        //verbose mode
-        is_verbose_mode = 1;
         break;
       case 'h':
         print_usage(argv[0]);
+        free_if_needed(bin_file_param);
 
-        free_if_needed(bin_input_param);
-        free_if_needed(bin_output_param);
- 
         exit(EXIT_SUCCESS);
       default :
         break;
     }
-  } 
+  }
 
   /**
    * Checking binary requirements
    * (could defined in a separate function)
    */
-  if (bin_input_param == NULL || bin_output_param == NULL)
+  if (bin_file_param == NULL)
   {
     dprintf(STDERR, "Bad usage! See HELP [--help|-h]\n");
 
     // Freeing allocated data
-    free_if_needed(bin_input_param);
-    free_if_needed(bin_output_param);
-    // Exiting with a failure ERROR CODE (== 1)
+    free_if_needed(bin_file_param);
+    // Exiting with a failure ERROR CODE  super-awesome(== 1)
     exit(EXIT_FAILURE);
   }
 
 
   // Printing params
-  dprintf(1, "** PARAMS **\n%-8s: %s\n%-8s: %s\n%-8s: %d\n", 
-          "input",   bin_input_param, 
-          "output",  bin_output_param, 
-          "verbose", is_verbose_mode);
+  dprintf(1, "** PARAMS **\n%-8s: %s\n",
+          "file",   bin_file_param
+  );
 
   // Business logic must be implemented at this point
 
-  /* LOREM IPSUM DOT SIR AMET */
 
+  int fd_input_file = open(bin_file_param, O_RDONLY);
+  handleError(fd_input_file == -1, "Erreur d'ouverture du fichier");
+  printf("%s", "file reversed : \n");
+
+  // moving pointer before the last char of the file
+  off_t nb_chars = lseek(fd_input_file, -1, SEEK_END) + 1;
+  char current_character = '\0';
+  off_t offset = 1;
+  do {
+    read(fd_input_file, &current_character, sizeof(char));
+    write(STDOUT, &current_character, sizeof(char));
+    lseek(fd_input_file, -offset, SEEK_END);
+  } while((offset++) <= nb_chars);
+
+  printf("%c", '\n');
+  close(fd_input_file);
 
   // Freeing allocated data
-  free_if_needed(bin_input_param);
-  free_if_needed(bin_output_param);
-
-
+  free_if_needed(bin_file_param);
   return EXIT_SUCCESS;
 }
