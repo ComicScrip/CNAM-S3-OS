@@ -40,34 +40,44 @@ void pipeError(){
     exit(EXIT_FAILURE);
 }
 
-void executePsProcessus(int tube[2]){
-  // close the read end of the pipe
-  close(tube[0]);
-  // redirect command output to the pipe
-  dup2(tube[1], STDOUT);
-  execlp("ps", "ps", "eaux", NULL);
+void executeGrepProcessus(int tube[2]) {
+  // close the pipe's write end
+  close(tube[1]);
+  // redirect output of grep to the black hole
+  int devNull = open("/dev/null", O_WRONLY);
+  dup2(STDOUT, devNull);
+  // redirect pipe read end to stdin that will feed grep
+  dup2(tube[0], STDIN);
+  execlp("grep \"^root\"", "grep", NULL);
 }
 
-void executeGrepProcessus() {
-  int retFork = fork();
+void executePsProcessus(){
+  // this process handles "ps eaux | grep "^root " > /dev/null"
+  // fork a child that that will read the "ps eaux" command output in a pipe
+
+  int retForkGrep = fork();
+  int childExitStatus = -1;
 
   int tube[2];
   int retPipe = pipe(tube);
   if(retPipe == -1) pipeError();
 
-  switch (retFork){
+  switch (retForkGrep){
       case -1: forkError(); break;
-      case 0 : executePsProcessus(tube); break;
+      case 0 : executeGrepProcessus(tube); break;
       default:
-        // close the pipe's write end
-        close(tube[1]);
-        // redirect output of grep to the black hole
-        int devNull = open("/dev/null", O_WRONLY);
-        dup2(STDOUT, devNull);
-        wait(NULL);
-        // redirect pipe read end to stdin that will feed grep
-        dup2(tube[0], STDIN);
-        execlp("grep", "grep", "\"^root\"", NULL);
+        // close the read end of the pipe
+        close(tube[0]);
+        // redirect command output to the tube
+        //dup2(STDOUT, tube[1]);
+        execlp("ps", "ps", "eaux", NULL);
+
+        waitpid(retForkGrep, &childExitStatus, 0);
+        if(childExitStatus == 0) {
+          exit(EXIT_SUCCESS);
+        } else {
+          exit(EXIT_FAILURE);
+        }
   }
 }
 
@@ -93,6 +103,9 @@ int main(int argc, char** argv)
             printf("\nroot est connecté\n");
         }
   }
+
+
+
 
   return EXIT_SUCCESS;
 }
