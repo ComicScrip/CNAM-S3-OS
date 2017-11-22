@@ -49,11 +49,12 @@ void executePsProcessus(int tube[2]){
 }
 
 void executeGrepProcessus() {
-  int retFork = fork();
 
   int tube[2];
   int retPipe = pipe(tube);
   if(retPipe == -1) pipeError();
+
+  int retFork = fork();
 
   switch (retFork){
       case -1: forkError(); break;
@@ -63,10 +64,12 @@ void executeGrepProcessus() {
         close(tube[1]);
         // redirect output of grep to the black hole
         int devNull = open("/dev/null", O_WRONLY);
-        dup2(STDOUT, devNull);
-        wait(NULL);
+        dup2(devNull, STDOUT);
         // redirect pipe read end to stdin that will feed grep
         dup2(tube[0], STDIN);
+
+        //wait(NULL); // wait for child process to write in pipe
+        printf("end wait \n");
         execlp("grep", "grep", "\"^root\"", NULL);
   }
 }
@@ -81,8 +84,8 @@ int main(int argc, char** argv)
   // this program's aim is to reproduce the following command : "ps eaux | grep "^root " > /dev/null && echo "root est connecté""
   // the main processus will fork a child that handles ps command
 
-  int retFork = fork();
   int childExitStatus = -1;
+  int retFork = fork();
 
   switch (retFork){
       case -1: forkError(); break;
