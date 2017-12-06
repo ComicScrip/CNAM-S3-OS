@@ -119,10 +119,10 @@ int main(int argc, char** argv)
    * Binary variables
    * (could be defined in a structure)
    */
-  char* bin_file_param = NULL;
+ char* bin_file_param = NULL;
 
   // Parsing options
-  int opt = -1;
+ /* int opt = -1;
   int opt_idx = -1;
 
   while ((opt = getopt_long(argc, argv, binary_optstr, binary_opts, &opt_idx)) != -1)
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
    * Checking binary requirements
    * (could defined in a separate function)
    */
-  if (bin_file_param == NULL)
+  /*if (bin_file_param == NULL)
   {
     dprintf(STDERR, "Bad usage! See HELP [--help|-h]\n");
 
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
     free_if_needed(bin_file_param);
     // Exiting with a failure ERROR CODE  super-awesome(== 1)
     exit(EXIT_FAILURE);
-  }
+  }*/
 
 
   // Printing params
@@ -168,24 +168,39 @@ int main(int argc, char** argv)
 
   // Business logic must be implemented at this point
 
-  int fd_input_file = open(bin_file_param, O_RDONLY);
-  handleError(fd_input_file == -1, "Erreur d'ouverture du fichier");
-  printf("%s", "file reversed : \n");
-
-  // moving pointer before the last char of the file
-  off_t nb_chars = lseek(fd_input_file, -1, SEEK_END) + 1;
-  char current_character = '\0';
-  off_t offset = 1;
-  do {
-    read(fd_input_file, &current_character, sizeof(char));
-    write(STDOUT, &current_character, sizeof(char));
-    lseek(fd_input_file, -offset, SEEK_END);
-  } while((offset++) <= nb_chars);
-
-  printf("%c", '\n');
-  close(fd_input_file);
-
-  // Freeing allocated data
-  free_if_needed(bin_file_param);
+	if(argc <= 1 )
+    { 
+        dprintf(STDERR, "Saisissez au moins 1 argument.\n");
+       	exit(EXIT_FAILURE);
+    }
+    else
+    {
+        dprintf(STDOUT, "Le premiere argument saisi est : %s\n", argv[1]);   
+    }
+    
+	int status;
+	int pid_fils;
+	
+	int f = fork();
+	printf("fork = %d \n", f);
+	
+	if (f == 0){
+		printf("je suis dans le fils : son pid est %d et ceui de son père est %d \n", getpid(), getppid());
+		pid_fils = getpid();
+		close(STDERR);
+		static char template[] = "/tmp/proc-exerciceXXX";
+		char file[25];
+		strcpy(file, template);
+		int fd = mkstemp(file);
+		printf("Le numero du descripteur du fils %s est : %d \n", file, fd);
+		execlp (argv[1], argv[1], (void*)0);
+		exit(1);
+	}
+	else
+	{
+		printf("je suis dans le père : son pid est %d et ceui de son fils est %d \n", getpid(), f);
+		wait(&status);
+		dprintf(STDOUT, "That's All Folks !\n");
+	}
   return EXIT_SUCCESS;
 }
