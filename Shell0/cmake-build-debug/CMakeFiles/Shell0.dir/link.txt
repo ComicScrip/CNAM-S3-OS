@@ -1,1 +1,0 @@
-/usr/bin/cc -g   CMakeFiles/Shell0.dir/main.c.o  -o Shell0 

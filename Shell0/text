@@ -1,0 +1,12 @@
+bin
+doc
+gcov
+include
+Makefile
+obj
+README.md
+src
+test
+tests
+text
+toto.txt

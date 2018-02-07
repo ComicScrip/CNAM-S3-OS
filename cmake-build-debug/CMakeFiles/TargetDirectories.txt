@@ -1,0 +1,3 @@
+/home/scrip/DATA/CNAM/S3/OS/CNAM-S3-OS/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/scrip/DATA/CNAM/S3/OS/CNAM-S3-OS/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/scrip/DATA/CNAM/S3/OS/CNAM-S3-OS/cmake-build-debug/CMakeFiles/Shell0.dir
