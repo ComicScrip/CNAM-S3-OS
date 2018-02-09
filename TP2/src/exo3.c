@@ -68,9 +68,8 @@ void executeGrepProcessus() {
         // redirect pipe read end to stdin that will feed grep
         dup2(tube[0], STDIN);
 
-        wait(NULL); // wait for child process to write in pipe
-
-        fprintf(stderr, "ok\n");
+        //wait(NULL); // wait for child process to write in pipe
+        printf("end wait \n");
         execlp("grep", "grep", "\"^root\"", NULL);
   }
 }
@@ -83,7 +82,7 @@ void executeGrepProcessus() {
 int main(int argc, char** argv)
 {
   // this program's aim is to reproduce the following command : "ps eaux | grep "^root " > /dev/null && echo "root est connecté""
-  // the main process will fork a child that handles ps command
+  // the main processus will fork a child that handles ps command
 
   int childExitStatus = -1;
   int retFork = fork();
