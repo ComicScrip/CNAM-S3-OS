@@ -34,7 +34,7 @@
  */
 void print_usage(char* bin_name)
 {
-  dprintf(1, "USAGE: %s %s\n\n%s\n", bin_name, USAGE_SYNTAX, USAGE_PARAMS);
+    dprintf(1, "USAGE: %s %s\n\n%s\n", bin_name, USAGE_SYNTAX, USAGE_PARAMS);
 }
 
 
@@ -48,7 +48,7 @@ void print_usage(char* bin_name)
  */
 void free_if_needed(void* to_free)
 {
-  if (to_free != NULL) free(to_free);
+    if (to_free != NULL) free(to_free);
 }
 
 
@@ -60,18 +60,18 @@ void free_if_needed(void* to_free)
  */
 char* dup_optarg_str()
 {
-  char* str = NULL;
+    char* str = NULL;
 
-  if (optarg != NULL)
-  {
-    str = strndup(optarg, MAX_PATH_LENGTH);
+    if (optarg != NULL)
+    {
+        str = strndup(optarg, MAX_PATH_LENGTH);
 
-    // Checking if ERRNO is set
-    if (str == NULL)
-      perror(strerror(errno));
-  }
+        // Checking if ERRNO is set
+        if (str == NULL)
+            perror(strerror(errno));
+    }
 
-  return str;
+    return str;
 }
 
 
@@ -83,11 +83,11 @@ char* dup_optarg_str()
  * \see struct option definition
  */
 static struct option binary_opts[] =
-{
-  { "help",    no_argument,       0, 'h' },
-  { "verbose", no_argument,       0, 'v' },
-  { 0,         0,                 0,  0  }
-};
+        {
+                { "help",    no_argument,       0, 'h' },
+                { "verbose", no_argument,       0, 'v' },
+                { 0,         0,                 0,  0  }
+        };
 
 /**
  * Binary options string
@@ -99,15 +99,15 @@ const char* binary_optstr = "hvi:o:";
 
 void parseInput(char* input, char inputParts[SHELL_INPUT_SIZE][SHELL_INPUT_SIZE]){
     for(int inputCurrentIndex, partCharIndex, partIndex = 0; inputCurrentIndex < SHELL_INPUT_SIZE; inputCurrentIndex++){
-      inputParts[partIndex][partCharIndex] = input[inputCurrentIndex];
-      printf("%c \n", inputParts[partIndex][partCharIndex]);
-      partCharIndex++;
-      if(input[inputCurrentIndex] == ' '){
-        partIndex++;
-        partCharIndex = 0;
-      } else if (input[inputCurrentIndex] == '\0') {
-        break;
-      }
+        inputParts[partIndex][partCharIndex] = input[inputCurrentIndex];
+        printf("%c \n", inputParts[partIndex][partCharIndex]);
+        partCharIndex++;
+        if(input[inputCurrentIndex] == ' '){
+            partIndex++;
+            partCharIndex = 0;
+        } else if (input[inputCurrentIndex] == '\0') {
+            break;
+        }
     }
 }
 
@@ -119,37 +119,37 @@ void parseInput(char* input, char inputParts[SHELL_INPUT_SIZE][SHELL_INPUT_SIZE]
  */
 int main(int argc, char** argv)
 {
-  /**
-   * Binary variables
-   * (could be defined in a structure)
-   */
-  short int is_verbose_mode = 0;
+    /**
+     * Binary variables
+     * (could be defined in a structure)
+     */
+    short int is_verbose_mode = 0;
 
-  // Parsing options
-  int opt = -1;
-  int opt_idx = -1;
+    // Parsing options
+    int opt = -1;
+    int opt_idx = -1;
 
-  while ((opt = getopt_long(argc, argv, binary_optstr, binary_opts, &opt_idx)) != -1)
-  {
-    switch (opt)
+    while ((opt = getopt_long(argc, argv, binary_optstr, binary_opts, &opt_idx)) != -1)
     {
-      case 'v':
-        //verbose mode
-        is_verbose_mode = 1;
-        break;
-      case 'h':
-        print_usage(argv[0]);
+        switch (opt)
+        {
+            case 'v':
+                //verbose mode
+                is_verbose_mode = 1;
+                break;
+            case 'h':
+                print_usage(argv[0]);
 
-        exit(EXIT_SUCCESS);
-      default :
-        break;
+                exit(EXIT_SUCCESS);
+            default :
+                break;
+        }
     }
-  }
 
-  /**
-   * Checking binary requirements
-   * (could defined in a separate function)
-   */
+    /**
+     * Checking binary requirements
+     * (could defined in a separate function)
+     */
 /*
   if (bin_input_param == NULL || bin_output_param == NULL)
   {
@@ -163,27 +163,27 @@ int main(int argc, char** argv)
   }
 */
 
-  // Printing params
+    // Printing params
 /*
   dprintf(1, "** PARAMS **\n%-8s: %s\n%-8s: %s\n%-8s: %d\n",
           "verbose", is_verbose_mode);
 */
-  // Business logic must be implemented at this point
+    // Business logic must be implemented at this point
 
-  char miniShellInput[SHELL_INPUT_SIZE];
-  while(1){
-    printf("Prompt >\n");
-    scanf("%s", miniShellInput);
-    char parsedInput[SHELL_INPUT_SIZE][SHELL_INPUT_SIZE];
-    parseInput(miniShellInput, parsedInput);
-    //execlp("ps", "ps", "eaux", NULL);
+    char miniShellInput[SHELL_INPUT_SIZE];
+    while(1){
+        printf("Prompt >\n");
+        scanf("%s", miniShellInput);
+        char parsedInput[SHELL_INPUT_SIZE][SHELL_INPUT_SIZE];
+        parseInput(miniShellInput, parsedInput);
+        execlp("ps", "ps", "eaux", NULL);
 
-  }
+    }
 
-  // Freeing allocated data
-  //free_if_needed(bin_input_param);
-  //free_if_needed(bin_output_param);
+    // Freeing allocated data
+    //free_if_needed(bin_input_param);
+    //free_if_needed(bin_output_param);
 
 
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
