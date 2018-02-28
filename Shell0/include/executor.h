@@ -2,6 +2,7 @@
 #define EXECUTOR_H
 
 #include "../include/simple_command.h"
+#include "../include/pipeline.h"
 
 /**
  * @defgroup shell0_executor Executor
@@ -18,12 +19,13 @@
  * @param char* args The arguments string that will be passed to the binary
  * @return int The return status of the command
  */
-
 void execute_simple_command(simple_command* sc);
 
 void apply_redirections(simple_command* sc);
 
 void execute_sync(simple_command* sc);
+
+void execute_pipeline(pipeline* p);
 
 /** @} */ // end of executor module
 #endif //EXECUTOR_H

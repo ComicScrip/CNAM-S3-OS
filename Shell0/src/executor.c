@@ -107,3 +107,7 @@ void apply_redirections(simple_command* sc) {
     // TODO: try to solve that http://tldp.org/LDP/abs/html/ioredirintro.html then kill myself.
   }
 }
+
+void execute_pipeline(pipeline* p) {
+
+}
