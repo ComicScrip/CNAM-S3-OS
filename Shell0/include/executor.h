@@ -25,7 +25,7 @@ void apply_redirections(simple_command* sc);
 
 void execute_sync(simple_command* sc);
 
-void execute_pipeline(pipeline* p);
+void execute_pipeline_sync(pipeline* p);
 
 /** @} */ // end of executor module
 #endif //EXECUTOR_H

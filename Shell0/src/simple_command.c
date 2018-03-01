@@ -113,7 +113,9 @@ simple_command* simple_command_from_string(char* str){
 
         if(s == CMD_REDIRECTIONS || i == (nb_words - 1)) { // we are done with the args
           // flush the args buffer into the struct
+          args_buffer[strlen(args_buffer)] = '\0';
           simple_command_set_args_from_string(sc, args_buffer);
+          args_buffer[0] = '\0';
         }
 
         break;
@@ -126,7 +128,6 @@ simple_command* simple_command_from_string(char* str){
             if(!(strcmp(next_word, "&") == 0) && !(contains(next_word, "<") || contains(next_word, ">"))){ // next_word is just a filename, lets put it with current redirection
               word_list[i] = realloc(w, sizeof(char) * (strlen(w) + strlen(next_word) + 1));
               w = word_list[i];
-              //printf("%s\n", next_word);
               strcat(w, next_word);
               // skip next word for next iteration
               i++;

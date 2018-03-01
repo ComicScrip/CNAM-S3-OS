@@ -52,11 +52,13 @@ pipeline* pipeline_from_string(char* str){
     if(c != '|') {
       simple_command_str_buffer = realloc(simple_command_str_buffer, (simple_command_str_buffer_l + 2) * sizeof(char));
       simple_command_str_buffer[simple_command_str_buffer_l] = c;
+      simple_command_str_buffer[simple_command_str_buffer_l + 1] = '\0';
       simple_command_str_buffer_l++;
     } else {
       simple_command_str_buffer[simple_command_str_buffer_l] = '\0';
-      simple_command_str_buffer_l = 0;
       pipeline_add_simple_command(p, simple_command_from_string(simple_command_str_buffer));
+      simple_command_str_buffer_l = 0;
+      simple_command_str_buffer[0] = '\0';
     }
   }
 

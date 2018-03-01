@@ -8,8 +8,8 @@
 #include "../include/simple_command.h"
 
 #include <sys/types.h>
- #include <sys/stat.h>
- #include <fcntl.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 /**
  Reads its input from a file (see Shell Scripts), from a string supplied as an argument to the -c invocation option (see Invoking Bash), or from the user's terminal.
@@ -27,14 +27,16 @@
  */
 int main(int argc, char** argv)
 {
-    char * user_input;
+    //char * user_input;
     while(1) {
-        user_input = get_usr_input();
+        execute_pipeline_sync(pipeline_from_string("ls | head | tail -n 5 | wc -c"));
+        break;
+        //user_input = get_usr_input();
         //char * user_input = "ls -ali";
-        simple_command * sc = simple_command_from_string(user_input);
+        //simple_command * sc = simple_command_from_string(user_input);
         //execute_simple_command(sc);
-        execute_sync(sc);
-        free(user_input);
+        //execute_sync(sc);
+        //free(user_input);
         //break;
     }
 
