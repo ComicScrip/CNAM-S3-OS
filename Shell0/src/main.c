@@ -6,6 +6,9 @@
 #include "../include/utils.h"
 #include "../include/executor.h"
 #include "../include/simple_command.h"
+#include "../include/pipeline_list.h"
+#include "../include/shell.h"
+
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,7 +32,12 @@ int main(int argc, char** argv)
 {
     //char * user_input;
     while(1) {
-        execute_pipeline_sync(pipeline_from_string("ls | head | tail -n 5 | wc -c"));
+      shell * s = shell_create();
+      //pipeline_list* pl = pipeline_list_from_string("ls -ali > testfile /home ; grep scrip < testfile && echo ok");
+      pipeline_list* pl = pipeline_list_from_string("echo \"\\\"test\" | grep test && echo lol");
+      //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
+      //execute_simple_command(simple_command_from_string("ls -ali /home"));
+        execute_pipeline_list(pl, s);
         break;
         //user_input = get_usr_input();
         //char * user_input = "ls -ali";

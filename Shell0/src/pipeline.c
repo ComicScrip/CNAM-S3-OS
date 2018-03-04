@@ -7,6 +7,9 @@
 pipeline* pipeline_create() {
   pipeline* p = (pipeline*) calloc(1, sizeof(pipeline));
   p->simple_commands = calloc(1, sizeof(list));
+  p->terminating_token = SEPARATOR;
+  p->exit_status = 1;
+  p->exit_status_inverted = 0;
   return p;
 }
 
@@ -44,21 +47,34 @@ pipeline* pipeline_from_string(char* str){
   pipeline* p = pipeline_create();
   int str_l = strlen(str);
   char* simple_command_str_buffer = calloc(1, sizeof(char));
-  int simple_command_str_buffer_l = 0;
   char c = '\0';
+  int escape_next_car = 0;
+  int in_quotes = 0;
 
   for(int i = 0; i < str_l; i++){
     c = str[i];
-    if(c != '|') {
-      simple_command_str_buffer = realloc(simple_command_str_buffer, (simple_command_str_buffer_l + 2) * sizeof(char));
-      simple_command_str_buffer[simple_command_str_buffer_l] = c;
-      simple_command_str_buffer[simple_command_str_buffer_l + 1] = '\0';
-      simple_command_str_buffer_l++;
-    } else {
-      simple_command_str_buffer[simple_command_str_buffer_l] = '\0';
-      pipeline_add_simple_command(p, simple_command_from_string(simple_command_str_buffer));
-      simple_command_str_buffer_l = 0;
-      simple_command_str_buffer[0] = '\0';
+
+    if(c == '\"' || c == '\'') {
+      if(!escape_next_car){
+        in_quotes = !in_quotes;
+      }
+      simple_command_str_buffer = append(simple_command_str_buffer, c);
+    }
+    else {
+      if(c == '\\') escape_next_car = 1;
+      else escape_next_car = 0;
+      if(in_quotes){
+        simple_command_str_buffer = append(simple_command_str_buffer, c);
+        continue;
+      }
+
+      if(c != '|') {
+        simple_command_str_buffer = append(simple_command_str_buffer, c);
+      } else {
+        simple_command_str_buffer[strlen(simple_command_str_buffer)] = '\0';
+        pipeline_add_simple_command(p, simple_command_from_string(simple_command_str_buffer));
+        simple_command_str_buffer[0] = '\0';
+      }
     }
   }
 

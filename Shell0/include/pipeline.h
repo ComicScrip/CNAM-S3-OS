@@ -4,7 +4,6 @@
 
 #include <string.h>
 
-#include "../include/sds.h"
 #include "../include/list.h"
 #include "../include/simple_command.h"
 
@@ -23,12 +22,22 @@
  *
 */
 
+typedef enum pipeline_terminating_token {
+  ASYNC, ///< execute the next pipeline list only of the exit status of the current one is other than 0
+  AND, ///< execute the next pipeline list only of the exit status of the current one is other than 0
+  OR, ///< execute the next pipeline list only of the exit status of the current one is other than 0
+  SEPARATOR ///< normal separator, do nothing
+} pipeline_terminating_token;
+
 /**
  * @struct pipeline
  * Represents a pipeline
  */
 typedef struct pipeline {
     list* simple_commands; ///< A list of the command's redirections. The list_items' data is of type simple_command*
+    pipeline_terminating_token terminating_token;
+    int exit_status_inverted; //< Indicates wether or not the return status of the pipeline should be inverted
+    int exit_status; //< The exit status of the pipeline is the exit status of the last command in the pipeline;
 } pipeline;
 
 /**

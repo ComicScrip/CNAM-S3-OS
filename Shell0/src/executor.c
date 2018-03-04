@@ -11,7 +11,6 @@
 #include <getopt.h>
 #include <unistd.h>
 
-#include "../include/sds.h"
 #include "../include/executor.h"
 #include "../include/simple_command.h"
 #include "../include/utils.h"
@@ -33,18 +32,19 @@ void execute_cmd_in_pipeline (simple_command* sc, int in, int out)
   }
 }
 
-void execute_pipeline_sync(pipeline* p) {
+void execute_pipeline(pipeline* p, int async, shell* s) {
   int child_exit_status = -1;
   int ret_fork = fork();
 
   if(ret_fork == -1) {  handle_error(1, "Could not fork"); }
   else if (ret_fork == 0) { // pipeline process
     int nb_commands = p->simple_commands->size;
-    if(nb_commands == 1) {
-      execute_sync(p->simple_commands->head->data);
-    }
+    /*if(nb_commands == 1) {
+      execute_simple_command(p->simple_commands->head->data);
+    }*/
 
     int nb_pipes = nb_commands - 1;
+    //printf("nb pipes : %d\n", nb_pipes);
     simple_command* sc = NULL;
     int in, fd_pipe[2];
     // The first process should get its input from STDIN_FILENO
@@ -65,29 +65,58 @@ void execute_pipeline_sync(pipeline* p) {
       dup2 (in, STDIN_FILENO);
     }
     // Execute the last command in the current process
-    simple_command* s = pipeline_get_next_simple_command(p);
-    execute_simple_command(s);
+    simple_command* last = pipeline_get_next_simple_command(p);
+    int exit_status_last = EXIT_FAILURE;
+    int fork_last = fork();
+    if(fork_last == -1) {  handle_error(1, "Could not fork"); }
+    else if (fork_last == 0 && last != NULL) {
+      execute_simple_command(last);
+    }
+    else {
+      waitpid(fork_last, &exit_status_last, 0);
+      exit((WIFEXITED(exit_status_last) && WEXITSTATUS(exit_status_last)) == EXIT_SUCCESS ? EXIT_SUCCESS : EXIT_FAILURE);
+    }
   } else { // shell process
-    waitpid(ret_fork, &child_exit_status, 0);
+    if(!async) {
+      //printf("\nwaiting for %d\n", ret_fork);
+      waitpid(ret_fork, &child_exit_status, 0);
+      //printf("\nwaited for %d, ret : %d\n", ret_fork, child_exit_status);
+      shell_set_var(s, "?", child_exit_status == 0 ? "0" : "1");
+    }
     //sc->exit_status = child_exit_status;
   }
 }
 
-void execute_sync(simple_command* sc) {
-  int child_exit_status = -1;
-  int ret_fork = fork();
+void execute_pipeline_list(pipeline_list* pl, shell* s) {
+  pipeline* p = pipeline_list_get_next_pipeline(pl);
+  pipeline* previous_p = NULL;
+  char* exit_status_previous = NULL;
+  char exit_code_var[2] = "?";
 
-  switch (ret_fork){
-      case -1: handle_error(1, "Could not fork"); break;
-      case 0 : execute_simple_command(sc); break;
-      default:
-        waitpid(ret_fork, &child_exit_status, 0);
-        sc->exit_status = child_exit_status;
+  for(int i=0; i< pl->pipelines->size; i++){
+    if(previous_p != NULL){
+      if(previous_p->terminating_token == SEPARATOR || previous_p->terminating_token == ASYNC) {
+        execute_pipeline(p, p->terminating_token == ASYNC, s);
+      } else { // AND, OR
+        exit_status_previous = shell_get_variable(s, exit_code_var);
+        if(exit_status_previous != NULL && (
+          (previous_p->terminating_token == AND && exit_status_previous[0] == '0') ||
+          (previous_p->terminating_token == OR && exit_status_previous[0] != '0')
+        )){
+          execute_pipeline(p, 0, s);
+        }
+      }
+      exit_status_previous = shell_get_variable(s, exit_code_var);
+    } else {
+      execute_pipeline(p, p->terminating_token == ASYNC, s);
+    }
+    previous_p = p;
+    p = pipeline_list_get_next_pipeline(pl);
   }
 }
 
 void execute_simple_command(simple_command* sc) {
-  //apply_redirections(sc);
+  apply_redirections(sc);
   execvp(sc->name, sc->argv);
 }
 
@@ -140,6 +169,10 @@ void apply_redirections(simple_command* sc) {
           free(stream_to_redirect_str);
         }
         char* file_name = &ri[1 + first_chevron_idx];
+        // not appending, reseting the file
+        if(access(file_name, F_OK ) == 0 ) {
+          handle_error(remove(file_name) != 0, "could not remove !");
+        }
         int fd = open(file_name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
         handle_error(dup2(fd, stream_to_redirect) < 0, "dup error");
         close(fd);

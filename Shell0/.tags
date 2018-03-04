@@ -1,0 +1,9 @@
+pipeline_list_create	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/pipeline_list.c	/^pipeline_list* pipeline_list_create() {$/;"	function	line:7
+pipeline_list_destroy	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/pipeline_list.c	/^void pipeline_list_destroy(pipeline_list* pl) {$/;"	function	line:13	signature:(pipeline_list* pl)
+pipeline_list_add_simple_command	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/pipeline_list.c	/^void pipeline_list_add_simple_command(pipeline_list* pl, simple_command* sc) {$/;"	function	line:32	signature:(pipeline_list* pl, simple_command* sc)
+plipeline_list_get_next_simple_command	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/pipeline_list.c	/^simple_command* plipeline_list_get_next_simple_command(pipeline_list* pl){$/;"	function	line:38	signature:(pipeline_list* pl)
+plipeline_list_from_string	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/pipeline_list.c	/^pipeline_list* plipeline_list_from_string(char* str){$/;"	function	line:43	signature:(char* str)
+pipeline_list_H	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^#define pipeline_list_H$/;"	macro	line:3
+pipeline_list	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^typedef struct pipeline_list {$/;"	struct	line:30
+pipelines	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^    list* pipelines; \/\/\/< A list of the command's redirections. The list_items' data is of type simple_command*$/;"	member	line:31	struct:pipeline_list
+pipeline_list	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^} pipeline_list;$/;"	typedef	line:32	typeref:struct:pipeline_list

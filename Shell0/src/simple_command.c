@@ -17,10 +17,8 @@ simple_command* simple_command_create() {
 }
 
 void free_args_if_needed(simple_command* cmd) {
-  if(cmd->argc > 0){
-    for(int i = 1; i < (cmd->argc + 2); i++){
-      free(cmd->argv[i]);
-    }
+  for(int i = 0; i < cmd->argc; i++){
+    free(cmd->argv[i]);
   }
   free(cmd->argv);
 }
@@ -58,19 +56,12 @@ char* simple_command_get_next_variable_assignement(simple_command* sc) {
   return li ? ((char*) li->data) : NULL;
 }
 
-void simple_command_set_args_from_string(simple_command* sc, char* args_str){
-  free_args_if_needed(sc);
-  int argc = 0;
-  char** argument_list = words(args_str, &argc);
-  char** argv = (char**) calloc(argc + 2, sizeof(char*)); // +2 for argv[0] and NULL terminating pointer that execv requires
-  argv[0] = sc->name;
-  for(int i=1; i <= argc; i++) {
-    argv[i] = argument_list[i-1];
-  }
-  argv[argc+1] = NULL;
-  sc->argv = argv;
-  sc->argc = argc;
-  free(argument_list);
+void simple_command_add_arg(simple_command* sc, char* arg) {
+  sc->argv = realloc(sc->argv, (sc->argc + 2) * sizeof(char*)); // argv needs to be a NULL termiated array
+  sc->argv[sc->argc] = calloc(1, sizeof(char) * strlen(arg) + 1);
+  sc->argv[sc->argc + 1] = NULL;
+  strcpy(sc->argv[sc->argc], arg);
+  sc->argc++;
 }
 
 simple_command* simple_command_from_string(char* str){
@@ -83,7 +74,26 @@ simple_command* simple_command_from_string(char* str){
   char* next_word = NULL;
 
   for(int i = 0; i < nb_words; i++){
-    w = word_list[i];
+    w = strip_quotes(word_list[i]); word_list[i] = w;
+    if((contains(w, ">") || contains(w, "<"))){
+      // we can write 'cmd >>file' or 'cmd >> file'
+      // in case there's a space we have to look for the next word...
+      if (!(i == (nb_words - 1)) && !contains(w, "&") && ((contains(w, ">") &&
+        w[strlen(w) -1] == '>') || (contains(w, "<") && w[strlen(w) -1] == '<')))
+      { // next word is set only if there is one
+        next_word = word_list[i+1];
+        if(!(contains(next_word, "<") || contains(next_word, ">"))){ // next_word is just a filename, lets put it with current redirection
+          word_list[i] = realloc(w, sizeof(char) * (strlen(w) + strlen(next_word) + 1));
+          w = word_list[i];
+          strcat(w, next_word);
+          // skip next word for next iteration
+          i++;
+        }
+      }
+      simple_command_add_redirection(sc, w);
+      continue;
+    }
+
     switch (s) {
       case ENV_ASSIGNMENTS:
         if(contains(w, "=")){
@@ -95,57 +105,18 @@ simple_command* simple_command_from_string(char* str){
       case CMD_NAME:
         sc->name = realloc(sc->name, (strlen(w) + 1) * sizeof(char));
         strcpy(sc->name, w);
+        simple_command_add_arg(sc, w);
         // in order to put argv[0] from command name
-        simple_command_set_args_from_string(sc, "");
+        //simple_command_set_args_from_string(sc, "");
         s = CMD_ARGS;
         break;
       case CMD_ARGS:
-        // To know if we are dealing with a redirection token
-        // look for redirection operator in non quoted words. TODO: handle non quoted
-        if((contains(w, ">") || contains(w, "<"))){
-          s = CMD_REDIRECTIONS;
-          i--;
-        } else {
-          args_buffer = realloc(args_buffer, args_buffer == NULL ? (strlen(w) + 2) : (strlen(w) + 2 + strlen(args_buffer)));
-          if(strlen(args_buffer)) strcat(args_buffer, " ");
-          strcat(args_buffer, w);
-        }
-
-        if(s == CMD_REDIRECTIONS || i == (nb_words - 1)) { // we are done with the args
-          // flush the args buffer into the struct
-          args_buffer[strlen(args_buffer)] = '\0';
-          simple_command_set_args_from_string(sc, args_buffer);
-          args_buffer[0] = '\0';
-        }
-
-        break;
-      case CMD_REDIRECTIONS:
-        if(!(strcmp(w, "&") == 0)){
-          // we can write 'cmd >>file' or 'cmd >> file'
-          // in case there's a space we have to look for the next word...
-          if(!(i == (nb_words - 1))){ // next word is set only if there is one
-            next_word = word_list[i+1];
-            if(!(strcmp(next_word, "&") == 0) && !(contains(next_word, "<") || contains(next_word, ">"))){ // next_word is just a filename, lets put it with current redirection
-              word_list[i] = realloc(w, sizeof(char) * (strlen(w) + strlen(next_word) + 1));
-              w = word_list[i];
-              strcat(w, next_word);
-              // skip next word for next iteration
-              i++;
-            }
-          } else {
-            next_word = "";
-          }
-          simple_command_add_redirection(sc, w);
-        } else {
-          sc->bg = 1;
-        }
-
+        simple_command_add_arg(sc, w);
         break;
       }
   }
 
   free(args_buffer);
-
   for(int i = 0; i < nb_words; i++){
     free(word_list[i]);
   }

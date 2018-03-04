@@ -54,22 +54,6 @@ static void test_simple_command_get_next_redirection_intent(void **state){
   assert_null(ri3);
 }
 
-static void test_simple_command_set_args_from_string(void **state){
-  simple_command* sc = *state;
-  sc->name = realloc(sc->name, 3 * sizeof(char));
-  strcpy(sc->name, "ls");
-  simple_command_set_args_from_string(sc, "-ali /home lol");
-  assert_string_equal(sc->argv[0], "ls");
-  assert_string_equal(sc->argv[1], "-ali");
-  assert_string_equal(sc->argv[2], "/home");
-
-  simple_command_set_args_from_string(sc, "  \t \"-ali\"  \n /home lol");
-
-  assert_string_equal(sc->argv[0], "ls");
-  assert_string_equal(sc->argv[1], "\"-ali\"");
-  assert_string_equal(sc->argv[2], "/home");
-}
-
 static void test_simple_command_destroy(void **state) {
   simple_command* sc = *state;
   simple_command_add_redirection(sc, "> file.txt");
@@ -79,7 +63,7 @@ static void test_simple_command_destroy(void **state) {
 
 static void test_simple_command_from_string(void **state){
   //simple_command * sc = simple_command_from_string("LC=en HOME='/root' ls -ali / ");
-  simple_command * sc = simple_command_from_string("LC=en HOME='/root' ls -ali / >> file.txt <file2.txt 2>&1 &");
+  simple_command * sc = simple_command_from_string("LC=en HOME='/root' ls -ali / >> file.txt <file2.txt 2>&1");
 
   assert_string_equal("LC=en", simple_command_get_next_variable_assignement(sc));
   assert_string_equal("HOME='/root'", simple_command_get_next_variable_assignement(sc));
@@ -91,18 +75,37 @@ static void test_simple_command_from_string(void **state){
   assert_string_equal(">>file.txt", simple_command_get_next_redirection_intent(sc));
   assert_string_equal("<file2.txt", simple_command_get_next_redirection_intent(sc));
   assert_string_equal("2>&1", simple_command_get_next_redirection_intent(sc));
-
-  assert_int_equal(sc->argc, 2);
-  assert_int_equal(sc->bg, 1);
+  assert_int_equal(sc->argc, 3);
 
   simple_command_destroy(sc);
+
+  simple_command * sc2 = simple_command_from_string("2>&1 ls -a >file /home");
+
+  assert_string_equal(sc2->name, "ls");
+  assert_string_equal("ls", sc2->argv[0]);
+  assert_string_equal("-a", sc2->argv[1]);
+  assert_string_equal("/home", sc2->argv[2]);
+  assert_string_equal("2>&1", simple_command_get_next_redirection_intent(sc2));
+  assert_string_equal(">file", simple_command_get_next_redirection_intent(sc2));
+  assert_int_equal(sc2->argc, 3);
+
+  simple_command_destroy(sc2);
+
+  simple_command * sc3 = simple_command_from_string("ls -ali \"my folder with spaces in the name \" /home");
+
+  assert_string_equal(sc3->name, "ls");
+  assert_string_equal("ls", sc3->argv[0]);
+  assert_string_equal("-ali", sc3->argv[1]);
+  assert_string_equal("my folder with spaces in the name ", sc3->argv[2]);
+  assert_string_equal("/home", sc3->argv[3]);
+  assert_int_equal(sc3->argc, 4);
+  simple_command_destroy(sc3);
 }
 
 const struct CMUnitTest tests[] = {
   cmocka_unit_test_setup_teardown(test_simple_command_create, setup, teardown),
   cmocka_unit_test_setup_teardown(test_simple_command_add_redirection, setup, teardown),
   cmocka_unit_test_setup_teardown(test_simple_command_get_next_redirection_intent, setup, teardown),
-  cmocka_unit_test_setup_teardown(test_simple_command_set_args_from_string, setup, teardown),
   cmocka_unit_test(test_simple_command_from_string),
   cmocka_unit_test_setup(test_simple_command_destroy, setup)
 };

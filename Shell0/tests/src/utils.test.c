@@ -37,6 +37,19 @@ static void test_utils_words(void ** state){
   assert_int_equal(nb_words, 6);
 
   free(w);
+
+
+  char* str2 = "ls \" my folder with spaces\"   ' t e st'  \"\\\"quotes\\\"\"";
+  int nb_words2 = 0;
+  char** w2 = words(str2, &nb_words2);
+
+  assert_string_equal(w2[0], "ls"); free(w2[0]);
+  assert_string_equal(w2[1], "\" my folder with spaces\""); free(w2[1]);
+  assert_string_equal(w2[2], "' t e st'"); free(w2[2]);
+  assert_string_equal(w2[3], "\"\\\"quotes\\\"\""); free(w2[3]);
+
+  assert_int_equal(nb_words, 6);
+  free(w2);
 }
 
 static void test_utils_index_of(void** state) {
@@ -45,10 +58,27 @@ static void test_utils_index_of(void** state) {
   assert_int_equal(index_of("Hello world !", "@", 1), -1);
 }
 
+static void test_utils_strip_quotes(void** state) {
+  char* str = calloc(1, 20 * sizeof(char));
+  strcpy(str, "\"test\"");
+
+  str = strip_quotes(str);
+  assert_string_equal(str, "test");
+  strcpy(str, "\"\\\"test\\\""); // '"\"test\""'
+  str = strip_quotes(str);
+  assert_string_equal(str, "\"test\"");
+  strcpy(str, "''test''");
+  str = strip_quotes(str);
+  assert_string_equal(str, "test");
+
+  free(str);
+}
+
 const struct CMUnitTest open_i2c_tests[] = {
   cmocka_unit_test(test_utils_contains),
   cmocka_unit_test(test_utils_words),
   cmocka_unit_test(test_utils_index_of),
+  cmocka_unit_test(test_utils_strip_quotes),
 };
 
 int main(void)

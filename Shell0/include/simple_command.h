@@ -4,7 +4,6 @@
 
 #include <string.h>
 
-#include "../include/sds.h"
 #include "../include/list.h"
 
 /**
@@ -34,12 +33,12 @@
 typedef struct simple_command {
     char* name; ///< The name of the executable, $PATH search will be performed
     char** argv; ///< The NULL terminated array of args, the first element of the array is the command name
-    int argc; ///< The number of arguments including the command
+    int argc; ///< The number of arguments including the command name
     char exit_status; ///< The exit status of the forked program once it is run.
     ///< Exit code range is from 0 to 255, where 0 means success, and the rest mean either something failed, or there is an issue to report back to the calling program
     list* redirections; ///< A list of the command's redirections. The list_items' data is of type char*
     list* env_assignements; ///< Environement varibales that should be assigned to the process
-    int bg; ///< Indicates wheter or not the command should be performed 'in the background'
+    int bg; ///< Indicates wheter or not the command should be performed 'in the background' //TODO: move that to pipeline !!
 } simple_command;
 
 /**
@@ -50,7 +49,6 @@ typedef enum {
   ENV_ASSIGNMENTS,
   CMD_NAME,
   CMD_ARGS,
-  CMD_REDIRECTIONS
 } simple_command_context;
 
 /**

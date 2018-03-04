@@ -51,7 +51,7 @@ int index_of(char* haystack, char* needle, int occurence_number);
 int contains(char* haystack, char* needle);
 
 /**
- * Splits the strings in parameters into words
+ * Splits the string in parameters into words
  * (sequences of characters deleimited by one or more blanks, ie: ' ', '\t' '\n')
  * @method words
  * @param  str   The string to split
@@ -59,6 +59,29 @@ int contains(char* haystack, char* needle);
  * @return       An array of strings with the words
  */
 char** words(char* str, int* nb_words);
+
+/**
+ * Reallocate str to append another string afer the latter
+ * @param  str The begining of the resulting string
+ * @param  to_append The end of the resulting string
+ * @return a pointer to the reallocated string containing str and to_append
+ */
+char* strcat_dyn(char* str, char* to_append);
+
+/**
+ * Reallocate str to append a single caracter afer the latter
+ * @param  str The begining of the resulting string
+ * @param  to_append The character to append
+ * @return a pointer to the reallocated string containing str and to_append
+ */
+char* append(char* str, char to_append);
+
+/**
+ * Remove quotes that are not escaped by \ in the string and realocate the string
+ * @param  str The string to remove quotes from. MUST BE malloc'd
+ * @return a pointer to the reallocated string passed in parameters
+ */
+char* strip_quotes(char* str);
 
 
 /** @} */ // end of utils module
