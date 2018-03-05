@@ -72,10 +72,14 @@ simple_command* simple_command_from_string(char* str){
   char* args_buffer = calloc(1, sizeof(char));
   char* w = NULL;
   char* next_word = NULL;
+  int was_quoted = 0;
+  int length_before_quote = 0;
 
   for(int i = 0; i < nb_words; i++){
+    length_before_quote = strlen(word_list[i]);
     w = strip_quotes(word_list[i]); word_list[i] = w;
-    if((contains(w, ">") || contains(w, "<"))){
+    was_quoted = length_before_quote != strlen(w);
+    if(!was_quoted && (contains(w, ">") || contains(w, "<"))){
       // we can write 'cmd >>file' or 'cmd >> file'
       // in case there's a space we have to look for the next word...
       if (!(i == (nb_words - 1)) && !contains(w, "&") && ((contains(w, ">") &&

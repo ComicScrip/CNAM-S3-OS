@@ -34,7 +34,7 @@ int main(int argc, char** argv)
     while(1) {
       shell * s = shell_create();
       //pipeline_list* pl = pipeline_list_from_string("ls -ali > testfile /home ; grep scrip < testfile && echo ok");
-      pipeline_list* pl = pipeline_list_from_string("echo \"\\\"test\" | grep test && echo lol");
+      pipeline_list* pl = pipeline_list_from_string("echo \"\\\">> m test\" | grep test && echo lol");
       //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
       //execute_simple_command(simple_command_from_string("ls -ali /home"));
         execute_pipeline_list(pl, s);
