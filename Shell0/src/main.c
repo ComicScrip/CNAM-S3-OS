@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include <unistd.h>
 
 #include "../include/cli.h"
 #include "../include/utils.h"
@@ -28,16 +29,35 @@
  * Binary main loop
  * @return EXIT_SUCCESS if it exit successfully
  */
-int main(int argc, char** argv)
+int main(int argc, char** argv, char** env)
 {
     //char * user_input;
     while(1) {
       shell * s = shell_create();
       //pipeline_list* pl = pipeline_list_from_string("ls -ali > testfile /home ; grep scrip < testfile && echo ok");
-      pipeline_list* pl = pipeline_list_from_string("echo \"\\\">> m test\" | grep test && echo lol");
+      //pipeline_list* pl = pipeline_list_from_string("echo \"\\\">> m test\" | grep test && echo lol");
       //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
       //execute_simple_command(simple_command_from_string("ls -ali /home"));
-        execute_pipeline_list(pl, s);
+      pipeline_list* pl = pipeline_list_from_string("TEST=11 /home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/printenv");
+      execute_pipeline_list(pl, s);
+
+      //pipeline* p = pipeline_list_get_next_pipeline(pl);
+      //simple_command* sc = pipeline_get_next_simple_command(p);
+      //printf("\nexecuting : --%s--\n", sc->name);
+      //execve(sc->name, sc->argv, NULL);
+
+/*
+      char *newargv[] = { NULL, "/home", NULL };
+      char *newenviron[] = { NULL };
+
+      newargv[0] = "ls";
+
+      handle_error(execve("/bin/ls", newargv, newenviron) == -1, "exec error");
+      printf("\n--%s--\n", "test");
+*/
+
+
+        //execute_pipeline_list(pl, s);
         break;
         //user_input = get_usr_input();
         //char * user_input = "ls -ali";

@@ -33,6 +33,26 @@ int contains(char* haystack, char* needle){
   return 0;
 }
 
+char** split(char* str, char c, int* nb_parts) {
+  char** ret = NULL;
+  int parts_l = 0;
+  int part_idx = 0;
+  for(int i=0; i < strlen(str); i++){
+    ret = realloc(ret, sizeof(char*) * (parts_l + 1));
+    if(str[i] == c) {
+      ret[parts_l][part_idx] = '\0';
+      part_idx = 0;
+      parts_l++;
+    } else {
+      ret[parts_l][part_idx] = str[i];
+      part_idx++;
+    }
+  }
+
+  if(nb_parts != NULL) *nb_parts = parts_l + 1;
+  return ret;
+}
+
 char** words(char* str, int* nb_words) {
   char** ret = NULL;
   const int l = strlen(str);

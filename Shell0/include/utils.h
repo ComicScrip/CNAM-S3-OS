@@ -83,6 +83,20 @@ char* append(char* str, char to_append);
  */
 char* strip_quotes(char* str);
 
+/**
+ * A GREAT replacement for strtok. Does not mutate the string passed in params.
+ * Dynamically creates an array of strings based on str and the delimiter c.
+ * exemple :
+ * @code
+ * strtok("aaa-bbb-ccc", '-', &nb_parts) -> ["aaa", "bbb", "ccc"], nb_parts == 3
+ * @endcode
+ * @method split
+ * @param  str The string to split
+ * @param  c The delimiter
+ * @param  nb_parts a pointer that will be dereferebced and affected the value of the number of parts str was split into.
+ * @return An array of the strings parts delimited by c
+ */
+char** split(char* str, char c, int* nb_parts);
 
 /** @} */ // end of utils module
 #endif //UTILS_H

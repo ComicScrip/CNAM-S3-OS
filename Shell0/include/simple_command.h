@@ -38,7 +38,6 @@ typedef struct simple_command {
     ///< Exit code range is from 0 to 255, where 0 means success, and the rest mean either something failed, or there is an issue to report back to the calling program
     list* redirections; ///< A list of the command's redirections. The list_items' data is of type char*
     list* env_assignements; ///< Environement varibales that should be assigned to the process
-    int bg; ///< Indicates wheter or not the command should be performed 'in the background' //TODO: move that to pipeline !!
 } simple_command;
 
 /**

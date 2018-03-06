@@ -39,9 +39,6 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
   if(ret_fork == -1) {  handle_error(1, "Could not fork"); }
   else if (ret_fork == 0) { // pipeline process
     int nb_commands = p->simple_commands->size;
-    /*if(nb_commands == 1) {
-      execute_simple_command(p->simple_commands->head->data);
-    }*/
 
     int nb_pipes = nb_commands - 1;
     //printf("nb pipes : %d\n", nb_pipes);
@@ -83,7 +80,6 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
       //printf("\nwaited for %d, ret : %d\n", ret_fork, child_exit_status);
       shell_set_var(s, "?", child_exit_status == 0 ? "0" : "1");
     }
-    //sc->exit_status = child_exit_status;
   }
 }
 
@@ -115,9 +111,46 @@ void execute_pipeline_list(pipeline_list* pl, shell* s) {
   }
 }
 
+void set_env_variables(simple_command* sc) {
+  char* va = NULL;
+  char** va_parts = NULL;
+  char* name = NULL;
+  char* value = NULL;
+  int nb_parts = 0;
+
+  while((va = simple_command_get_next_variable_assignement(sc))){
+    printf("\nva : --%s--\n", va);
+    va_parts = split(va, '=', &nb_parts);
+    printf("%d\n", nb_parts);
+    if(nb_parts == 2){
+      name = va_parts[0];
+      value = va_parts[1];
+      printf("\nsetting env k: --%s-- v:--%s--, va:%s\n", name, value, va);
+      // dont use putenv, it keeps a referecne to the assignment string and does not copy it
+      //int ret_se = setenv(name, value, 1);
+      //printf("\nsetenv : %d\n", ret_se);
+      // dont use setenv() neiher https://rachelbythebay.com/w/2014/08/16/forkenv/ JUST DO NOTHING, ITS NOT POSSIBLE...
+    }
+    //for(int j = 0; j < nb_parts; j++) free(va_parts[j]);
+    //free(va_parts);
+  }
+}
+
 void execute_simple_command(simple_command* sc) {
   apply_redirections(sc);
-  execvp(sc->name, sc->argv);
+  if(strlen(sc->name) > 0){
+    //set_env_variables(sc);
+    //setenv("TEST", "42", 1);
+    char* env[] = {"TEST=42", NULL};
+    /*char* assignment = NULL;
+    for(int i = 0; i < sc->env_assignements->size; i++) {
+      env = realloc(env, sizeof(char*) * (i + 1));
+
+      env[i] = realloc(env[i], sizeof(char) * strlen(assignment))
+    }*/
+    //handle_error((execve(sc->name, sc->argv, env)) == -1, "err exec");
+    handle_error(execvpe(sc->name, sc->argv, env) == -1, "exec error");
+  }
 }
 
 void apply_redirections(simple_command* sc) {
