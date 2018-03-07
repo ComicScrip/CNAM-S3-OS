@@ -1,6 +1,8 @@
 #include <string.h>
+#include <stdio.h>
 #include "../include/list.h"
 #include "../include/dictionary.h"
+#include "../include/utils.h"
 
 dictionary* dictionary_create() {
   dictionary* d = malloc(sizeof(dictionary));
@@ -47,7 +49,6 @@ char* dictionary_get(dictionary* d, char* key) {
 }
 
 void dictionary_set(dictionary* d, char* key, char* value) {
-  //printf("\nsetting : k %s v %s\n", key, value);
   int klen, vlen;
   klen = strlen(key); vlen=strlen(value);
   if(klen == 0) return;
@@ -66,7 +67,50 @@ void dictionary_set(dictionary* d, char* key, char* value) {
     list_push(d->entries, li);
     //printf("\nafter set %p\n", d);
   } else { // there is alredy an entry for the key
+
     de->value = realloc(de->value, sizeof(char) * vlen + 1);
     strcpy(de->value, value);
   }
+  list_reinit_iteration(d->entries);
+}
+
+char** dictionnary_to_string_array(dictionary* d, char sep) {
+  list_reinit_iteration(d->entries);
+  char** ret = calloc((d->size + 1), sizeof(char*));
+  int j, k;
+
+  for(int i = 0; i < d->size; i++) {
+    dictionary_entry* de = (dictionary_entry*) list_get_next(d->entries)->data;
+
+    ret[i] = malloc(sizeof(char) * (strlen(de->key) + strlen(de->value) + 2));
+    for(j = 0; j < strlen(de->key); j++) ret[i][j] = de->key[j];
+    ret[i][j] = sep;
+    for(k = 0; k < strlen(de->value); k++) ret[i][j + k + 1] = de->value[k];
+    ret[i][j + k + 1] = '\0';
+  }
+
+  return ret;
+}
+
+dictionary* dictionnary_from_string_array(char** str_array, char sep, int nb_entries){
+  dictionary* d = dictionary_create();
+  char* str_entry = NULL;
+  char** str_entry_parts = NULL;
+  char* name = NULL;
+  char* value = NULL;
+  int nb_parts = 0;
+
+  for(int i=0; i < nb_entries; i++){
+    str_entry = str_array[i];
+    str_entry_parts = split(str_entry, sep, &nb_parts, 2);
+    if(nb_parts == 2){
+      name = str_entry_parts[0];
+      value = str_entry_parts[1];
+      dictionary_set(d, name, value);
+    }
+    for(int j = 0; j < nb_parts; j++) free(str_entry_parts[j]);
+    free(str_entry_parts);
+  }
+
+  return d;
 }

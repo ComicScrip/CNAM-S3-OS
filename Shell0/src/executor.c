@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -15,8 +16,11 @@
 #include "../include/simple_command.h"
 #include "../include/utils.h"
 
-void execute_cmd_in_pipeline (simple_command* sc, int in, int out)
-{
+int execute_if_builtin(simple_command* sc, shell* s){
+    return 0;
+}
+
+void execute_cmd_in_pipeline (simple_command* sc, int in, int out, shell* s){
   pid_t pid;
   if ((pid = fork ()) == 0){
     if (in != STDIN_FILENO){
@@ -27,19 +31,17 @@ void execute_cmd_in_pipeline (simple_command* sc, int in, int out)
       dup2(out, STDOUT_FILENO);
       close(out);
     }
-
-    execute_simple_command(sc);
+    execute_simple_command(sc, s);
   }
 }
 
 void execute_pipeline(pipeline* p, int async, shell* s) {
   int child_exit_status = -1;
-  int ret_fork = fork();
+  pid_t ret_fork = fork();
 
   if(ret_fork == -1) {  handle_error(1, "Could not fork"); }
   else if (ret_fork == 0) { // pipeline process
     int nb_commands = p->simple_commands->size;
-
     int nb_pipes = nb_commands - 1;
     //printf("nb pipes : %d\n", nb_pipes);
     simple_command* sc = NULL;
@@ -50,7 +52,7 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
     for (int i = 0; i < nb_pipes; i++) {
       sc = pipeline_get_next_simple_command(p);
       pipe(fd_pipe);
-      execute_cmd_in_pipeline(sc, in, fd_pipe[1]);
+      execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
       // Close end of the pipe, the child will write here.
       close (fd_pipe[1]);
       // The next child will read from the read end of the pipe
@@ -67,7 +69,7 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
     int fork_last = fork();
     if(fork_last == -1) {  handle_error(1, "Could not fork"); }
     else if (fork_last == 0 && last != NULL) {
-      execute_simple_command(last);
+      execute_simple_command(last, s);
     }
     else {
       waitpid(fork_last, &exit_status_last, 0);
@@ -78,13 +80,29 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
       //printf("\nwaiting for %d\n", ret_fork);
       waitpid(ret_fork, &child_exit_status, 0);
       //printf("\nwaited for %d, ret : %d\n", ret_fork, child_exit_status);
-      shell_set_var(s, "?", child_exit_status == 0 ? "0" : "1");
+      shell_set_special_var(s, "?", child_exit_status == 0 ? "0" : "1");
     }
   }
 }
 
 void execute_pipeline_list(pipeline_list* pl, shell* s) {
   pipeline* p = pipeline_list_get_next_pipeline(pl);
+  if(pl->pipelines->size == 1 && p->simple_commands->size == 1){
+    simple_command* sc = pipeline_get_next_simple_command(p);
+    if(strlen(sc->name) == 0) { // it's a varibale assignment for the current shell
+      dictionary* sc_assignment_dic = dictionnary_from_string_array(sc->env_assignements, '=', sc->nb_assignments);
+      dictionary_entry* de = NULL;
+      for(int i = 0; i < sc->nb_assignments; i++){
+        de = (dictionary_entry*)((list_item*)list_get_next(sc_assignment_dic->entries))->data;
+        shell_set_user_var(s, de->key, de->value);
+      }
+
+      return;
+    } else {
+      list_reinit_iteration(p->simple_commands);
+    }
+  }
+
   pipeline* previous_p = NULL;
   char* exit_status_previous = NULL;
   char exit_code_var[2] = "?";
@@ -94,7 +112,7 @@ void execute_pipeline_list(pipeline_list* pl, shell* s) {
       if(previous_p->terminating_token == SEPARATOR || previous_p->terminating_token == ASYNC) {
         execute_pipeline(p, p->terminating_token == ASYNC, s);
       } else { // AND, OR
-        exit_status_previous = shell_get_variable(s, exit_code_var);
+        exit_status_previous = shell_get_special_variable(s, exit_code_var);
         if(exit_status_previous != NULL && (
           (previous_p->terminating_token == AND && exit_status_previous[0] == '0') ||
           (previous_p->terminating_token == OR && exit_status_previous[0] != '0')
@@ -102,7 +120,7 @@ void execute_pipeline_list(pipeline_list* pl, shell* s) {
           execute_pipeline(p, 0, s);
         }
       }
-      exit_status_previous = shell_get_variable(s, exit_code_var);
+      exit_status_previous = shell_get_special_variable(s, exit_code_var);
     } else {
       execute_pipeline(p, p->terminating_token == ASYNC, s);
     }
@@ -111,45 +129,42 @@ void execute_pipeline_list(pipeline_list* pl, shell* s) {
   }
 }
 
-void set_env_variables(simple_command* sc) {
-  char* va = NULL;
-  char** va_parts = NULL;
-  char* name = NULL;
-  char* value = NULL;
-  int nb_parts = 0;
+void make_env_for_child(simple_command* sc, shell* s) {
+  // we want the var assignments made before command name to overwrite the shell env passed to the command
+  dictionary* user_assignments = dictionnary_from_string_array(sc->env_assignements, '=', sc->nb_assignments);
+  dictionary* merged = dictionary_create();
+  dictionary_entry* de = NULL;
 
-  while((va = simple_command_get_next_variable_assignement(sc))){
-    printf("\nva : --%s--\n", va);
-    va_parts = split(va, '=', &nb_parts);
-    printf("%d\n", nb_parts);
-    if(nb_parts == 2){
-      name = va_parts[0];
-      value = va_parts[1];
-      printf("\nsetting env k: --%s-- v:--%s--, va:%s\n", name, value, va);
-      // dont use putenv, it keeps a referecne to the assignment string and does not copy it
-      //int ret_se = setenv(name, value, 1);
-      //printf("\nsetenv : %d\n", ret_se);
-      // dont use setenv() neiher https://rachelbythebay.com/w/2014/08/16/forkenv/ JUST DO NOTHING, ITS NOT POSSIBLE...
-    }
-    //for(int j = 0; j < nb_parts; j++) free(va_parts[j]);
-    //free(va_parts);
+  for(int i = 0; i < s->environement_variables->size; i++){
+    de = (dictionary_entry*)((list_item*)list_get_next(s->environement_variables->entries))->data;
+    dictionary_set(merged, de->key, de->value);
   }
+
+  for(int i = 0; i < sc->nb_assignments; i++){
+    de = (dictionary_entry*)((list_item*)list_get_next(user_assignments->entries))->data;
+    dictionary_set(merged, de->key, de->value);
+  }
+
+  for(int i = 0; i < sc->nb_assignments; i++){
+    //TODO: fix this
+    //printf("\n--%s--\n", sc->env_assignements[i]);
+    //free(sc->env_assignements[i]);
+  }
+  free(sc->env_assignements);
+
+  sc->env_assignements = dictionnary_to_string_array(merged, '=');
+  sc->nb_assignments = merged->size;
+
+  dictionary_destroy(merged);
 }
 
-void execute_simple_command(simple_command* sc) {
+void execute_simple_command(simple_command* sc, shell* s) {
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
-    //set_env_variables(sc);
-    //setenv("TEST", "42", 1);
-    char* env[] = {"TEST=42", NULL};
-    /*char* assignment = NULL;
-    for(int i = 0; i < sc->env_assignements->size; i++) {
-      env = realloc(env, sizeof(char*) * (i + 1));
-
-      env[i] = realloc(env[i], sizeof(char) * strlen(assignment))
-    }*/
-    //handle_error((execve(sc->name, sc->argv, env)) == -1, "err exec");
-    handle_error(execvpe(sc->name, sc->argv, env) == -1, "exec error");
+    make_env_for_child(sc, s);
+    handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "exec error");
+  } else {
+    handle_error(1, "Invalid command...");
   }
 }
 

@@ -4,7 +4,10 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
-pipeline_list_H	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^#define pipeline_list_H$/;"	macro	line:3
-pipeline_list	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^typedef struct pipeline_list {$/;"	struct	line:30
-pipelines	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^    list* pipelines; \/\/\/< A list of the command's redirections. The list_items' data is of type simple_command*$/;"	member	line:31	struct:pipeline_list
-pipeline_list	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/include/pipeline_list.h	/^} pipeline_list;$/;"	typedef	line:32	typeref:struct:pipeline_list
+_GNU_SOURCE	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^#define _GNU_SOURCE$/;"	macro	line:1	file:
+execute_cmd_in_pipeline	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void execute_cmd_in_pipeline (simple_command* sc, int in, int out, shell* s){$/;"	function	line:19	signature:(simple_command* sc, int in, int out, shell* s)
+execute_pipeline	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void execute_pipeline(pipeline* p, int async, shell* s) {$/;"	function	line:34	signature:(pipeline* p, int async, shell* s)
+execute_pipeline_list	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void execute_pipeline_list(pipeline_list* pl, shell* s) {$/;"	function	line:84	signature:(pipeline_list* pl, shell* s)
+make_env_for_child	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void make_env_for_child(simple_command* sc, shell* s) {$/;"	function	line:129	signature:(simple_command* sc, shell* s)
+execute_simple_command	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void execute_simple_command(simple_command* sc, shell* s) {$/;"	function	line:155	signature:(simple_command* sc, shell* s)
+apply_redirections	/home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/src/executor.c	/^void apply_redirections(simple_command* sc) {$/;"	function	line:165	signature:(simple_command* sc)

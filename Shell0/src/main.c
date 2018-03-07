@@ -10,7 +10,6 @@
 #include "../include/pipeline_list.h"
 #include "../include/shell.h"
 
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -26,46 +25,24 @@
 **/
 
 /**
- * Binary main loop
- * @return EXIT_SUCCESS if it exit successfully
+ * Entry point of the program
+ * @return EXIT_SUCCESS if there if evrything went fine
  */
 int main(int argc, char** argv, char** env)
 {
-    //char * user_input;
+    char * user_input;
+    shell * s = shell_create(env);
     while(1) {
-      shell * s = shell_create();
       //pipeline_list* pl = pipeline_list_from_string("ls -ali > testfile /home ; grep scrip < testfile && echo ok");
       //pipeline_list* pl = pipeline_list_from_string("echo \"\\\">> m test\" | grep test && echo lol");
       //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
-      //execute_simple_command(simple_command_from_string("ls -ali /home"));
-      pipeline_list* pl = pipeline_list_from_string("TEST=11 /home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/printenv");
+      //pipeline_list* pl = pipeline_list_from_string("TEST=42 /home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/printenv | grep TEST");
+      user_input = get_usr_input();
+      pipeline_list* pl = pipeline_list_from_string(user_input);
       execute_pipeline_list(pl, s);
-
-      //pipeline* p = pipeline_list_get_next_pipeline(pl);
-      //simple_command* sc = pipeline_get_next_simple_command(p);
-      //printf("\nexecuting : --%s--\n", sc->name);
-      //execve(sc->name, sc->argv, NULL);
-
-/*
-      char *newargv[] = { NULL, "/home", NULL };
-      char *newenviron[] = { NULL };
-
-      newargv[0] = "ls";
-
-      handle_error(execve("/bin/ls", newargv, newenviron) == -1, "exec error");
-      printf("\n--%s--\n", "test");
-*/
-
-
-        //execute_pipeline_list(pl, s);
-        break;
-        //user_input = get_usr_input();
-        //char * user_input = "ls -ali";
-        //simple_command * sc = simple_command_from_string(user_input);
-        //execute_simple_command(sc);
-        //execute_sync(sc);
-        //free(user_input);
-        //break;
+      pipeline_list_destroy(pl);
+      //break;
+      free(user_input);
     }
 
     return EXIT_SUCCESS;

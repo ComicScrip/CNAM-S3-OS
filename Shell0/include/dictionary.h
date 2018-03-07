@@ -58,6 +58,22 @@ void dictionary_set(dictionary* d, char* key, char* value);
  */
 char* dictionary_get(dictionary* d, char* key);
 
+/**
+ * Creates a string array from the dictionnary
+ * @param  d The dictionnary to take entries from
+ * @param  sep The separator used to separate the key from the value in the strings
+ * @return A pointer to a dynamically allocated array of strings or NULL if the dictionnary is empty
+ */
+char** dictionnary_to_string_array(dictionary* d, char sep);
+
+/**
+ * Creates a dictionnary from string array
+ * @param  str_array the string array to contruct the dictionary from
+ * @param  sep The separator used to separate keys and values
+ * @param  nb_enties The number of entries in the array
+ * @return A pointer to a dynamically allocated dictionary
+ */
+dictionary* dictionnary_from_string_array(char** str_array, char sep, int nb_entries);
 
 /** @} */ // end of DICTIONNARY module
 #endif //DICTIONNARY_H

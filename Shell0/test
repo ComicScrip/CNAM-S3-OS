@@ -1,1 +1,23 @@
 lol 1
+total 96
+2017284 drwxr-xr-x  9 scrip scrip  4096 mars   7 13:02 .
+2017194 drwxr-xr-x 12 scrip scrip  4096 févr. 28 01:54 ..
+1966569 -rw-rw-r--  1 scrip scrip     3 mars   2 14:48 2
+2017285 drwxr-xr-x  2 scrip scrip  4096 mars   7 23:06 bin
+2017286 drwxr-xr-x  4 scrip scrip  4096 févr. 28 01:54 doc
+2017291 drwxr-xr-x  2 scrip scrip  4096 févr. 28 01:54 gcov
+2017292 drwxr-xr-x  2 scrip scrip  4096 mars   6 19:53 include
+1984281 -rw-rw-r--  1 scrip scrip     0 mars   5 23:41 m
+2001479 -rw-r--r--  1 scrip scrip  2223 févr. 22 14:41 Makefile
+2370775 drwxrwxr-x  2 scrip scrip  4096 mars   7 23:06 obj
+1966557 -rwxrwxr-x  1 scrip scrip  8712 mars   6 19:41 printenv
+1984400 -rw-rw-r--  1 scrip scrip   211 mars   6 19:40 printenv.c
+2001481 -rw-r--r--  1 scrip scrip  1141 févr. 22 18:18 README.md
+2017294 drwxr-xr-x  2 scrip scrip  4096 mars   4 18:12 src
+1984311 -rw-rw-r--  1 scrip scrip 10929 mars   7 13:02 .tags
+1966571 -rw-rw-r--  1 scrip scrip  1663 mars   7 13:02 .tags1
+1983914 -rw-rw-r--  1 scrip scrip     6 mars   5 23:48 test
+1966563 -rw-rw-r--  1 scrip scrip   366 mars   5 21:15 testfile
+2378489 drwxrwxr-x  6 scrip scrip  4096 févr. 22 14:40 tests
+1966573 -rw-rw-r--  1 scrip scrip    73 févr. 28 01:20 text
+1971124 -rw-rw-r--  1 scrip scrip     4 févr. 27 03:46 toto.txt

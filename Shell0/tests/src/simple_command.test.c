@@ -62,11 +62,11 @@ static void test_simple_command_destroy(void **state) {
 }
 
 static void test_simple_command_from_string(void **state){
-  //simple_command * sc = simple_command_from_string("LC=en HOME='/root' ls -ali / ");
   simple_command * sc = simple_command_from_string("LC=en HOME='/root' ls -ali / >> file.txt <file2.txt 2>&1");
 
-  assert_string_equal("LC=en", simple_command_get_next_variable_assignement(sc));
-  assert_string_equal("HOME='/root'", simple_command_get_next_variable_assignement(sc));
+  assert_int_equal(sc->nb_assignments, 2);
+  assert_string_equal("LC=en", sc->env_assignements[0]);
+  assert_string_equal("HOME=/root", sc->env_assignements[1]);
   assert_string_equal(sc->name, "ls");
   assert_string_equal("ls", sc->argv[0]);
   assert_string_equal("-ali", sc->argv[1]);

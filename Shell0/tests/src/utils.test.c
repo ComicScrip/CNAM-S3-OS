@@ -74,11 +74,37 @@ static void test_utils_strip_quotes(void** state) {
   free(str);
 }
 
+static void test_utils_split(void** state){
+  int nb_parts;
+  char** parts = split("test=42", '=', &nb_parts, 2);
+  assert_int_equal(nb_parts, 2);
+  assert_string_equal(parts[0], "test");
+  assert_string_equal(parts[1], "42");
+  free(parts[0]);
+  free(parts[1]);
+  free(parts);
+
+  char** parts2 = split("test42=", '=', &nb_parts, 1);
+  assert_int_equal(nb_parts, 1);
+  assert_string_equal(parts2[0], "test42");
+  free(parts2[0]);
+  free(parts2);
+
+  char** parts3 = split("test=42=43", '=', &nb_parts, 2);
+  assert_int_equal(nb_parts, 2);
+  assert_string_equal(parts3[0], "test");
+  assert_string_equal(parts3[1], "42=43");
+  free(parts3[0]);
+  free(parts3[1]);
+  free(parts3);
+}
+
 const struct CMUnitTest open_i2c_tests[] = {
   cmocka_unit_test(test_utils_contains),
   cmocka_unit_test(test_utils_words),
   cmocka_unit_test(test_utils_index_of),
   cmocka_unit_test(test_utils_strip_quotes),
+  cmocka_unit_test(test_utils_split),
 };
 
 int main(void)

@@ -6,7 +6,6 @@
 #include "../include/pipeline_list.h"
 #include "../include/shell.h"
 
-
 /**
  * @defgroup shell0_executor Executor
  * This module is reponsible for defining functions relative to the execution of parts of a shell script
@@ -16,12 +15,11 @@
 */
 
 /**
- * Executes a simple command with its arguments
- * @param char* cmd The binary path
- * @param char* args The arguments string that will be passed to the binary
- * @return int The return status of the command
+ * Executes a simple command
+ * @param sc The simple command to execute
+ * @param s The shell to execute the command in (it provides environnement)
  */
-void execute_simple_command(simple_command* sc);
+void execute_simple_command(simple_command* sc, shell* s);
 
 /**
  * Apply all the command's redirections to the latter

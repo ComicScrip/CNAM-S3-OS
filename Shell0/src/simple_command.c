@@ -12,7 +12,8 @@ simple_command* simple_command_create() {
   sc->argc = 0;
   sc->exit_status = -1;
   sc->redirections = calloc(1, sizeof(list));
-  sc->env_assignements = calloc(1, sizeof(list));
+  sc->env_assignements = NULL;
+  sc->nb_assignments = 0;
   return sc;
 }
 
@@ -23,9 +24,16 @@ void free_args_if_needed(simple_command* cmd) {
   free(cmd->argv);
 }
 
+void free_assignments_if_needed(simple_command* cmd) {
+  for(int i = 0; i < cmd->nb_assignments; i++){
+    free(cmd->env_assignements[i]);
+  }
+  free(cmd->env_assignements);
+}
+
 void simple_command_destroy(simple_command* cmd) {
   list_destroy(cmd->redirections);
-  list_destroy(cmd->env_assignements);
+  free_assignments_if_needed(cmd);
   free_args_if_needed(cmd);
   free(cmd->name);
   free(cmd);
@@ -39,20 +47,14 @@ void simple_command_add_redirection(simple_command* sc, char* redirection_str) {
 }
 
 void simple_command_add_variable_assignement(simple_command* sc, char* assignement_str){
-  list_item* li = calloc(1, sizeof(list_item));
-  li->data = calloc(strlen(assignement_str) + 1, sizeof(char));
-  strcpy(li->data, assignement_str);
-  list_push(sc->env_assignements, li);
+  sc->env_assignements = realloc(sc->env_assignements, sizeof(char*) * (sc->nb_assignments + 1)); // +1 for termnating array
+  sc->env_assignements[sc->nb_assignments] = realloc(sc->env_assignements[sc->nb_assignments], sizeof(char) * (strlen(assignement_str) + 1));
+  strcpy(sc->env_assignements[sc->nb_assignments], assignement_str);
+  sc->nb_assignments++;
 }
-
 
 char* simple_command_get_next_redirection_intent(simple_command* sc){
   list_item* li = list_get_next(sc->redirections);
-  return li ? ((char*) li->data) : NULL;
-}
-
-char* simple_command_get_next_variable_assignement(simple_command* sc) {
-  list_item* li = list_get_next(sc->env_assignements);
   return li ? ((char*) li->data) : NULL;
 }
 

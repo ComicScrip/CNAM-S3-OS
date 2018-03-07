@@ -94,9 +94,10 @@ char* strip_quotes(char* str);
  * @param  str The string to split
  * @param  c The delimiter
  * @param  nb_parts a pointer that will be dereferebced and affected the value of the number of parts str was split into.
+ * @param parts_needed The maximum number of parts you will have
  * @return An array of the strings parts delimited by c
  */
-char** split(char* str, char c, int* nb_parts);
+char** split(char* str, char c, int* nb_parts, int parts_needed);
 
 /** @} */ // end of utils module
 #endif //UTILS_H

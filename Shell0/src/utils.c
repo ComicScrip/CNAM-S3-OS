@@ -33,26 +33,6 @@ int contains(char* haystack, char* needle){
   return 0;
 }
 
-char** split(char* str, char c, int* nb_parts) {
-  char** ret = NULL;
-  int parts_l = 0;
-  int part_idx = 0;
-  for(int i=0; i < strlen(str); i++){
-    ret = realloc(ret, sizeof(char*) * (parts_l + 1));
-    if(str[i] == c) {
-      ret[parts_l][part_idx] = '\0';
-      part_idx = 0;
-      parts_l++;
-    } else {
-      ret[parts_l][part_idx] = str[i];
-      part_idx++;
-    }
-  }
-
-  if(nb_parts != NULL) *nb_parts = parts_l + 1;
-  return ret;
-}
-
 char** words(char* str, int* nb_words) {
   char** ret = NULL;
   const int l = strlen(str);
@@ -163,5 +143,37 @@ char* strip_quotes(char* str){
   }
   ret[ret_idx] = '\0';
   free(str);
+  return ret;
+}
+
+char** split(char* str, char c, int* nb_parts, int parts_needed) {
+  int str_l = strlen(str);
+  char** ret = calloc(1, sizeof(char*));
+  int parts_l = 0;
+  int part_idx = 0;
+  int do_split = 1;
+  int i;
+
+  for(i=0; i < str_l; i++){
+    ret = realloc(ret, sizeof(char*) * (parts_l + 1));
+    ret[parts_l] = realloc(ret[parts_l], (part_idx + 1) * sizeof(char));
+    if(str[i] == c && do_split) {
+      ret[parts_l][part_idx] = '\0';
+      part_idx = 0;
+      if(i != (str_l - 1)) parts_l++;
+      if(parts_l == (parts_needed - 1)) do_split = 0;
+    } else {
+      ret[parts_l] = realloc(ret[parts_l], (part_idx + 1)*sizeof(char));
+      ret[parts_l][part_idx] = str[i];
+      part_idx++;
+    }
+  }
+
+  if(part_idx != 0){
+    ret[parts_l][part_idx] = '\0';
+  }
+
+  if(nb_parts != NULL) *nb_parts = parts_l + 1;
+
   return ret;
 }
