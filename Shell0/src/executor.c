@@ -243,9 +243,9 @@ void apply_redirections(simple_command* sc) {
       // TODO: handle heredoc
     }
 
-    // TODO: factor this shit out
+    // TODO: refactor this sh*t
     // TODO: handle fd closing (>&-)
     // TODO: find out what the heck is 1>&3-
-    // TODO: try to solve that http://tldp.org/LDP/abs/html/ioredirintro.html then kill myself.
+    // TODO: try to solve that http://tldp.org/LDP/abs/html/ioredirintro.html, then kill myself.
   }
 }
