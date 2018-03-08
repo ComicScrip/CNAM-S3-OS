@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define HISTORY_FILE ""
+#define HISTORY_FILE "command-history.txt"
 
 /**
  * Entry point of the program
@@ -36,7 +36,7 @@ int main(int argc, char** argv, char** env)
     //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
     //pipeline_list* pl = pipeline_list_from_string("TEST=42 /home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/printenv | grep TEST");
     user_input = get_usr_input(s);
-    log(HISTORY_FILE, user_input);
+    log_command_in_history(HISTORY_FILE, user_input);
     pipeline_list* pl = pipeline_list_from_string(user_input);
     execute_pipeline_list(pl, s);
     pipeline_list_destroy(pl);

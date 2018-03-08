@@ -28,7 +28,7 @@ void handle_error(int check, char * msg);
  * @param  filename The log file path
  * @param  str The string to log
  */
-void log(char* filename, char* str);
+void log_command_in_history(char* filename, char* str);
 
 /**
  * Finds the index of a sequence of characters in a string.

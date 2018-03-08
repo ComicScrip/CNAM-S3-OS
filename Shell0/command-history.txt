@@ -1,0 +1,3 @@
+ls -ali
+ls | grep bin
+pwd

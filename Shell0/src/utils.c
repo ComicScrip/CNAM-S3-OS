@@ -17,8 +17,11 @@ void handle_error(int check, char * msg) {
     }
 }
 
-void log(char* filename, char* str){
-  // TODO: implement that
+void log_command_in_history(char* filename, char* str){
+  FILE *pFile = NULL;
+  handle_error((pFile=fopen(filename, "a")) == NULL, "Error opening file command history file");
+  fprintf(pFile, "%s", str);
+  fclose(pFile);
 }
 
 int contains(char* haystack, char* needle){
