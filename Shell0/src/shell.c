@@ -1,3 +1,7 @@
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
+
 #include "../include/dictionary.h"
 #include "../include/shell.h"
 #include "../include/utils.h"
@@ -21,6 +25,10 @@ shell* shell_create(char** env) {
     }
   }
 
+  char current_pid[] = {0,0,0,0,0,0,0};
+  sprintf(current_pid, "%d", getpid());
+  shell_set_special_var(s, "$$", current_pid);
+  
   return s;
 }
 

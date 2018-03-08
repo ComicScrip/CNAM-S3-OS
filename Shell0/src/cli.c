@@ -3,16 +3,19 @@
 #include <string.h>
 
 #include "../include/cli.h"
+#include "../include/shell.h"
 
-#define PROMPT ">  "
+#define PROMPT "> "
 
-void print_prompt() {
-    printf("%s", PROMPT);
+void print_prompt(shell* s) {
+  //TODO: find why the following line swallow stdout
+  //printf("--%s-- %s", shell_get_variable(s, "PWD"), PROMPT);
+  printf("%s%s", "", PROMPT);
 }
 
-char* get_usr_input(){
+char* get_usr_input(shell* s){
     #define CHUNK 300
-    print_prompt();
+    print_prompt(s);
 
     char* input = calloc(CHUNK, sizeof(char));
     char tempbuf[CHUNK];

@@ -24,6 +24,13 @@ void free_if_needed(void* to_free);
 void handle_error(int check, char * msg);
 
 /**
+ * Logs the str at the end of filename
+ * @param  filename The log file path
+ * @param  str The string to log
+ */
+void log(char* filename, char* str);
+
+/**
  * Finds the index of a sequence of characters in a string.
  *
  * For exemple,

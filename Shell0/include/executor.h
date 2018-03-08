@@ -41,5 +41,14 @@ void execute_pipeline(pipeline* p, int async, shell* s);
  */
 void execute_pipeline_list(pipeline_list* pl, shell* s);
 
+/**
+ * If the simple command is a builtin, execute the latter
+ * @param  sc The potential builtin to execute
+ * @param  s The shell to execute the command into
+ * @return 1 if it was a builtin, 0 otherwise
+ */
+int execute_if_builtin(simple_command* sc, shell* s);
+
+
 /** @} */ // end of executor module
 #endif //EXECUTOR_H

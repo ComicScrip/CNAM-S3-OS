@@ -17,6 +17,10 @@ void handle_error(int check, char * msg) {
     }
 }
 
+void log(char* filename, char* str){
+  // TODO: implement that
+}
+
 int contains(char* haystack, char* needle){
   const int haystack_length = strlen(haystack);
   const int needle_length = strlen(needle);

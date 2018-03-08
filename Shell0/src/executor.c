@@ -17,7 +17,21 @@
 #include "../include/utils.h"
 
 int execute_if_builtin(simple_command* sc, shell* s){
-    return 0;
+  if(strcmp(sc->name, "exit") == 0){
+    //TODO : implement that
+    return 1;
+  } else if(strcmp(sc->name, "cd") == 0){
+    //TODO : implement that
+    return 1;
+  } else if(strcmp(sc->name, "echo") == 0){
+    //TODO : implement that
+    return 1;
+  } else if(strcmp(sc->name, "pwd") == 0){
+    //TODO : implement that
+    return 1;
+  }
+
+  return 0;
 }
 
 void execute_cmd_in_pipeline (simple_command* sc, int in, int out, shell* s){
@@ -162,7 +176,7 @@ void execute_simple_command(simple_command* sc, shell* s) {
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
     make_env_for_child(sc, s);
-    handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "exec error");
+    handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "Execution error ");
   } else {
     handle_error(1, "Invalid command...");
   }
