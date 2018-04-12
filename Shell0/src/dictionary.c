@@ -53,6 +53,7 @@ void dictionary_set(dictionary* d, char* key, char* value) {
   klen = strlen(key); vlen=strlen(value);
   if(klen == 0) return;
 
+
   dictionary_entry* de = dictionary_entry_search(d, key);
 
   if(de == NULL) { // no current_entry for given key

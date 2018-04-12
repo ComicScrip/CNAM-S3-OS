@@ -18,16 +18,18 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-    //TODO : implement that
+	  
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
-    //TODO : implement that
+    chdir(sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "echo") == 0){
-    //TODO : implement that
+    printf("%s \n", sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "pwd") == 0){
-    //TODO : implement that
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    printf("Current working dir: %s\n", cwd);
     return 1;
   }
 
@@ -45,11 +47,13 @@ void execute_cmd_in_pipeline (simple_command* sc, int in, int out, shell* s){
       dup2(out, STDOUT_FILENO);
       close(out);
     }
-    execute_simple_command(sc, s);
+	execute_simple_command(sc, s);
+	
   }
 }
 
 void execute_pipeline(pipeline* p, int async, shell* s) {
+	
   int child_exit_status = -1;
   pid_t ret_fork = fork();
 
@@ -66,7 +70,11 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
     for (int i = 0; i < nb_pipes; i++) {
       sc = pipeline_get_next_simple_command(p);
       pipe(fd_pipe);
-      execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
+      int plop = execute_if_builtin(sc, s);
+      if(!plop){
+		  execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
+	   }
+      
       // Close end of the pipe, the child will write here.
       close (fd_pipe[1]);
       // The next child will read from the read end of the pipe
@@ -101,6 +109,7 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
 
 void execute_pipeline_list(pipeline_list* pl, shell* s) {
   pipeline* p = pipeline_list_get_next_pipeline(pl);
+  
   if(pl->pipelines->size == 1 && p->simple_commands->size == 1){
     simple_command* sc = pipeline_get_next_simple_command(p);
     if(strlen(sc->name) == 0) { // it's a varibale assignment for the current shell
@@ -173,6 +182,10 @@ void make_env_for_child(simple_command* sc, shell* s) {
 }
 
 void execute_simple_command(simple_command* sc, shell* s) {
+	if(execute_if_builtin(sc, s))
+	{
+		return;
+	}
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
     make_env_for_child(sc, s);
