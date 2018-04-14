@@ -33,16 +33,16 @@ int main(int argc, char** argv, char** env)
   char * user_input;
   shell * s = shell_create(env);
   
-  if(strcmp(argv[1], "-c") == 0)
-  {
-	user_input = argv[2];
-    log_command_in_history(HISTORY_FILE, user_input);
-    pipeline_list* pl = pipeline_list_from_string(user_input);
-    execute_pipeline_list(pl, s);
-    pipeline_list_destroy(pl);
-    free(user_input);
-    return EXIT_SUCCESS;
-   }
+  //if(strcmp(argv[1], "-c") == 0)
+  //{
+	//user_input = argv[2];
+    //log_command_in_history(HISTORY_FILE, user_input);
+    //pipeline_list* pl = pipeline_list_from_string(user_input);
+    //execute_pipeline_list(pl, s);
+    //pipeline_list_destroy(pl);
+    //free(user_input);
+    //return EXIT_SUCCESS;
+   //}
   
   while(1) {
     //pipeline_list* pl = pipeline_list_from_string("ls -ali > testfile /home ; grep scrip < testfile && echo ok");

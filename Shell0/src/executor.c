@@ -18,13 +18,17 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-	  
+	  exit(1); //marche pas 
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
     chdir(sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "echo") == 0){
-    printf("%s \n", sc->argv[1]);
+	 for(int i=1; i< sc->argc; i++)
+	 {
+		printf("%s ", sc->argv[i]);
+	}
+	printf("\n");
     return 1;
   } else if(strcmp(sc->name, "pwd") == 0){
     char cwd[1024];
