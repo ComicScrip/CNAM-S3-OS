@@ -18,7 +18,7 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-	  exit(1); //marche pas 
+	  exit(1);
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
     chdir(sc->argv[1]);
@@ -74,10 +74,8 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
     for (int i = 0; i < nb_pipes; i++) {
       sc = pipeline_get_next_simple_command(p);
       pipe(fd_pipe);
-      int plop = execute_if_builtin(sc, s);
-      if(!plop){
-		  execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
-	   }
+
+	  execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
       
       // Close end of the pipe, the child will write here.
       close (fd_pipe[1]);
@@ -113,9 +111,10 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
 
 void execute_pipeline_list(pipeline_list* pl, shell* s) {
   pipeline* p = pipeline_list_get_next_pipeline(pl);
-  
+  int plop = 0;
   if(pl->pipelines->size == 1 && p->simple_commands->size == 1){
     simple_command* sc = pipeline_get_next_simple_command(p);
+    plop = execute_if_builtin(sc, s);
     if(strlen(sc->name) == 0) { // it's a varibale assignment for the current shell
       dictionary* sc_assignment_dic = dictionnary_from_string_array(sc->env_assignements, '=', sc->nb_assignments);
       dictionary_entry* de = NULL;
@@ -137,7 +136,9 @@ void execute_pipeline_list(pipeline_list* pl, shell* s) {
   for(int i=0; i< pl->pipelines->size; i++){
     if(previous_p != NULL){
       if(previous_p->terminating_token == SEPARATOR || previous_p->terminating_token == ASYNC) {
-        execute_pipeline(p, p->terminating_token == ASYNC, s);
+		if(!plop){
+			execute_pipeline(p, p->terminating_token == ASYNC, s);
+		}
       } else { // AND, OR
         exit_status_previous = shell_get_special_variable(s, exit_code_var);
         if(exit_status_previous != NULL && (

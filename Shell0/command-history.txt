@@ -1,3 +1,5 @@
 ls -ali
 ls | grep bin
 pwd
+exit
+exit
