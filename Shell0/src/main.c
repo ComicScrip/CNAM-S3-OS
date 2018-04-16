@@ -32,7 +32,6 @@ int main(int argc, char** argv, char** env)
 
   char * user_input;
   shell * s = shell_create(env);
-  printf("%s \n", argv[1]);
    if(argc > 1 && strcmp(argv[1], "-c") == 0  )
    {
 	 user_input = argv[2];

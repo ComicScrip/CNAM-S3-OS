@@ -24,7 +24,7 @@ int execute_if_builtin(simple_command* sc, shell* s){
     chdir(sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "echo") == 0){
-	 for(int i=1; i< sc->argc; i++)
+	 for(int i=1; i< sc->argc; ++i)
 	 {
 		printf("%s ", sc->argv[i]);
 	}
@@ -74,7 +74,6 @@ void execute_pipeline(pipeline* p, int async, shell* s) {
     for (int i = 0; i < nb_pipes; i++) {
       sc = pipeline_get_next_simple_command(p);
       pipe(fd_pipe);
-
 	  execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
       
       // Close end of the pipe, the child will write here.
@@ -187,10 +186,6 @@ void make_env_for_child(simple_command* sc, shell* s) {
 }
 
 void execute_simple_command(simple_command* sc, shell* s) {
-	if(execute_if_builtin(sc, s))
-	{
-		return;
-	}
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
     make_env_for_child(sc, s);
