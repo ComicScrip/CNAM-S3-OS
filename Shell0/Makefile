@@ -34,7 +34,7 @@ all: $(SRC) $(INC) $(BIN_DIR)/$(EXEC) $(MAN)
 $(OBJ): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c $(INC_DIR)/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
-	
+
 
 $(BIN_DIR)/$(EXEC): $(OBJ)
 	$(LINKER) $@ $(LFLAGS) $(OBJ)
@@ -54,12 +54,10 @@ $(TEST_EXECS): $(MODULES) $(TEST_OBJ)
 	@echo "Linking complete!"
 
 gcov: $(GEXEC)
-	# generate some data for gcov by calling the generated binary with various options
-	$(GCOV_DIR)/$(GEXEC) -h
-	$(GCOV_DIR)/$(GEXEC) -i input -o output -v
+	$(GCOV_DIR)/$(GEXEC)
 
-	find ./ -maxdepth 1 -name *.gcno -exec mv {} $(GCOV_DIR) \;
-	find ./ -maxdepth 1 -name *.gcda -exec mv {} $(GCOV_DIR) \;
+	find ./ -maxdepth 1 -name \*.gcno -exec mv {} $(GCOV_DIR) \;
+	find ./ -maxdepth 1 -name \*.gcda -exec mv {} $(GCOV_DIR) \;
 
 	gcov -o $(GCOV_DIR) $(GEXEC)
 	lcov -o $(GCOV_DIR)/$(LCOV_REPORT) -c -f -d $(GCOV_DIR)
@@ -69,10 +67,10 @@ package: gcov doc all
 	rm -r $(AR_NAME)
 	tar cvfz $(AR_NAME) ./*
 
-man: 
+man:
 	gzip Shell0.1
 	sudo mkdir -p /usr/share/man/man1
-	sudo cp Shell0.1.gz /usr/share/man/man1 
+	sudo cp Shell0.1.gz /usr/share/man/man1
 
 doc:
 	doxygen $(DOC_DIR)/doxygen.conf

@@ -39,6 +39,13 @@ $ sudo apt-get install doxygen graphviz
 $ make doc && xdg-open doc/html/index.html
 ```
 
+## Testing manually and generating a coverage report
+
+```
+$ sudo apt-get install lcov
+$ make gcov
+```
+
 ## Authors
 
 * Pierre Genthon
