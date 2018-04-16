@@ -1,0 +1,52 @@
+.TH
+Shell0 1 "15 avril 2018" "Version 1" "MAN"
+.SH NAME
+Shell0 \- Mini Shell
+.SH SYNOPSIS
+.B Shell0
+[options] [command_string | file]
+.SH DESCRIPTION
+Shell0 is a mini command language interpreter that executes commands.
+.SH OPTIONS
+.B -c 		 
+If the -c option is present, then commands are read from  the first non-option argument command_string.  If there are arguments after the command_string,  they  are  assigned  to  the positional parameters, starting with $0.
+.SH SHELL GRAMMAR
+.B Simple Commands 
+A simple command is a sequence of optional  variable  assignments  followed  by  blank-separated  words and redirections, and terminated by a control operator.  The first word specifies the command to be executed, and  is  passed  as  argument  zero.  The remaining words are passed as arguments to the invoked command.
+
+The return value of a simple command is its exit status,  or  128+n  if the command is terminated by signal n.
+
+.B Pipelines
+pipeline  is  a sequence of one or more commands separated by one of the control operators | or |&.  The format for a pipeline is:
+[time [-p]] [ ! ] command [ [|⎪|&] command2 ... ]
+The standard output of command is connected via a pipe to the  standard input  of  command2.   This connection is performed before any redirections specified by the command (see REDIRECTION below).  If |& is used, command's  standard  error, in addition to its standard output, is connected to command2's standard input through the pipe; it  is  shorthand for  2>&1  |.   This  implicit redirection of the standard error to the standard output is performed after any redirections  specified  by  the command.
+
+The return status of a pipeline is the exit status of the last command, unless the pipefail option is enabled.  If  pipefail  is  enabled,  the pipeline's  return  status is the value of the last (rightmost) command to exit with a non-zero status, or zero if all commands  exit  successfully.  If the reserved word !  precedes a pipeline, the exit status of that pipeline is the logical negation of the exit status  as  described above.   The  shell waits for all commands in the pipeline to terminate before returning a value. If the time reserved word precedes a pipeline, the elapsed as  well  as user  and  system  time consumed by its execution are reported when the pipeline terminates.  The -p option changes the output format  to  that specified  by POSIX.  When the shell is in posix mode, it does not recognize time as a reserved word if the next token  begins  with  a  `-'. The  TIMEFORMAT  variable  may be set to a format string that specifies how the timing information should be displayed; see the description  of TIMEFORMAT under Shell Variables below.
+
+When the shell is in posix mode, time may be followed by a newline.  In this case, the shell displays the total user and system  time  consumed by  the shell and its children.  The TIMEFORMAT variable may be used to specify the format of the time information.
+
+Each command in a pipeline is executed as a separate process (i.e.,  in a subshell).
+.B
+Lists
+
+A  list  is a sequence of one or more pipelines separated by one of the operators ;, &, &&, or ||, and optionally terminated by one of ;, &, or <newline>.
+Of these list operators, && and || have equal precedence, followed by ; and &, which have equal precedence.
+
+A sequence of one or more newlines may appear in a list  instead  of  a semicolon to delimit commands. If  a  command  is terminated by the control operator &, the shell executes the command in the background in a subshell.  The shell does  not wait  for  the command to finish, and the return status is 0.  Commands separated by a ; are executed sequentially; the shell  waits  for  each  command  to terminate in turn.  The return status is the exit status of the last command executed.
+
+AND and OR lists are sequences of one of more  pipelines  separated  by the  &&  and  || control operators, respectively.  AND and OR lists are executed with left associativity.  An AND list has the form
+
+command1 && command2
+
+command2 is executed if, and only if, command1 returns an  exit  status of zero.
+
+An OR list has the form
+
+command1 || command2
+
+command2  is  executed  if and only if command1 returns a non-zero exit status.  The return status of AND and OR lists is the  exit  status  of the last command executed in the list.
+
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Pierre Genthon & Tom Wendel

@@ -29,11 +29,12 @@ GEXEC=$(EXEC).cov
 
 AR_NAME=archive_$(EXEC).tar.gz
 
-all: $(SRC) $(INC) $(BIN_DIR)/$(EXEC)
+all: $(SRC) $(INC) $(BIN_DIR)/$(EXEC) $(MAN)
 
 $(OBJ): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c $(INC_DIR)/%.h
 	$(CC) $(CFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully!"
+	
 
 $(BIN_DIR)/$(EXEC): $(OBJ)
 	$(LINKER) $@ $(LFLAGS) $(OBJ)
@@ -67,6 +68,11 @@ gcov: $(GEXEC)
 package: gcov doc all
 	rm -r $(AR_NAME)
 	tar cvfz $(AR_NAME) ./*
+
+man: 
+	gzip Shell0.1
+	sudo mkdir -p /usr/share/man/man1
+	sudo cp Shell0.1.gz /usr/share/man/man1 
 
 doc:
 	doxygen $(DOC_DIR)/doxygen.conf
