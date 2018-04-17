@@ -18,14 +18,13 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-	 kill(s->pid, SIGKILL);
+	 //kill(s->pid, SIGKILL);
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
     chdir(sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "echo") == 0){
-	 for(int i=1; i< sc->argc; ++i)
-	 {
+	 for(int i=1; i< sc->argc; ++i) {
 		printf("%s ", sc->argv[i]);
 	}
 	printf("\n");
