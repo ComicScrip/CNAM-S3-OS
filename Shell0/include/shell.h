@@ -24,6 +24,7 @@ typedef struct shell {
   dictionary* special_variables; ///< Contains things like $?, $0, $n, $$ etc
   dictionary* aliases; ///< The command aliases registered for the shell
   list* jobs; ///< Background processes
+  pid_t pid;
 } shell;
 
 /**
