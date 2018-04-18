@@ -1,5 +1,44 @@
-ls -ali
-ls | grep bin
-pwd
+echo test
 exit
 exit
+exit
+echo lol
+exit
+exit
+echo lol
+echo lol
+exit
+echo test
+exit
+exit
+echo test
+ls
+exit
+echo ok
+echo test
+ls
+ls
+ls
+ls
+echo test
+ls
+echo test
+echo test
+ls
+ls
+ls
+ls
+echo test
+echo test
+echo test
+echo test
+echo test
+ls
+ls
+exit
+exit
+ls
+ls
+ls
+echo
+echo
