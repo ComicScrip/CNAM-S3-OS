@@ -42,3 +42,4 @@ ls
 ls
 echo
 echo
+ls -aloi

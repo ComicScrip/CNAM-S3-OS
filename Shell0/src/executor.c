@@ -18,15 +18,16 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-    //kill(s->pid, SIGKILL);
+    exit(1);
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
     chdir(sc->argv[1]);
     return 1;
   } else if(strcmp(sc->name, "echo") == 0){
-    for(int i=1; i< sc->argc; ++i) {
-      printf("%s\n ", sc->argv[i]);
-    }
+     for(int i=1; i< sc->argc; ++i) {
+		printf("%s ", sc->argv[i]);
+	}
+	printf("\n");
     return 1;
   } else if(strcmp(sc->name, "pwd") == 0){
     char cwd[1024];
@@ -49,103 +50,105 @@ void execute_cmd_in_pipeline (simple_command* sc, int in, int out, shell* s){
       dup2(out, STDOUT_FILENO);
       close(out);
     }
-	  execute_simple_command(sc, s);
+    execute_simple_command(sc, s);
   }
 }
 
-  void execute_pipeline(pipeline* p, int async, shell* s) {
-   int child_exit_status = -1;
-   pid_t ret_fork = fork();
+void execute_pipeline(pipeline* p, int async, shell* s) {
+  int child_exit_status = -1;
+  pid_t ret_fork = fork();
+  
+  if(ret_fork == -1) {  handle_error(1, "Could not fork"); }
+  else if (ret_fork == 0) { // pipeline process
+    int nb_commands = p->simple_commands->size;
+    int nb_pipes = nb_commands - 1;
+    //printf("nb pipes : %d\n", nb_pipes);
+    simple_command* sc = NULL;
+    int in, fd_pipe[2];
+    // The first process should get its input from STDIN_FILENO
+    in = STDIN_FILENO;
+    // Spawn all commands, execpt the last in the pipeline
+    for (int i = 0; i < nb_pipes; i++) {
+      sc = pipeline_get_next_simple_command(p);
+      pipe(fd_pipe);
+      int isBuiltin = execute_if_builtin( sc, s);
+      if(!isBuiltin){
+		execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
+      }
+      // Close end of the pipe, the child will write here.
+      close (fd_pipe[1]);
+      // The next child will read from the read end of the pipe
+      in = fd_pipe[0];
+    }
 
-   if(ret_fork == -1) {  handle_error(1, "Could not fork"); }
-   else if (ret_fork == 0) { // pipeline process
-     int nb_commands = p->simple_commands->size;
-     int nb_pipes = nb_commands - 1;
-     //printf("nb pipes : %d\n", nb_pipes);
-     simple_command* sc = NULL;
-     int in, fd_pipe[2];
-     // The first process should get its input from STDIN_FILENO
-     in = STDIN_FILENO;
-     // Spawn all commands, execpt the last in the pipeline
-     for (int i = 0; i < nb_pipes; i++) {
-       sc = pipeline_get_next_simple_command(p);
-       pipe(fd_pipe);
-       execute_cmd_in_pipeline(sc, in, fd_pipe[1], s);
-       // Close end of the pipe, the child will write here.
-       close (fd_pipe[1]);
-       // The next child will read from the read end of the pipe
-       in = fd_pipe[0];
-     }
+    // Last command of pipeline, set STDIN_FILENO be the read end of the previous pipe
+    if (in != STDIN_FILENO) {
+      dup2 (in, STDIN_FILENO);
+    }
+    // Execute the last command in the current process
+    simple_command* last = pipeline_get_next_simple_command(p);
+    int exit_status_last = EXIT_FAILURE;
+    int fork_last = fork();
+    if(fork_last == -1) {  handle_error(1, "Could not fork"); }
+    else if (fork_last == 0 && last != NULL) {
+      execute_simple_command(last, s);
+    }
+    else {
+      waitpid(fork_last, &exit_status_last, 0);
+      exit((WIFEXITED(exit_status_last) && WEXITSTATUS(exit_status_last)) == EXIT_SUCCESS ? EXIT_SUCCESS : EXIT_FAILURE);
+    }
+  } else { // shell process
+    if(!async) {
+      //printf("\nwaiting for %d\n", ret_fork);
+      waitpid(ret_fork, &child_exit_status, 0);
+      //printf("\nwaited for %d, ret : %d\n", ret_fork, child_exit_status);
+      shell_set_special_var(s, "?", child_exit_status == 0 ? "0" : "1");
+    }
+  }
+}
 
-     // Last command of pipeline, set STDIN_FILENO be the read end of the previous pipe
-     if (in != STDIN_FILENO) {
-       dup2 (in, STDIN_FILENO);
-     }
-     // Execute the last command in the current process
-     simple_command* last = pipeline_get_next_simple_command(p);
-     int exit_status_last = EXIT_FAILURE;
-     int fork_last = fork();
-     if(fork_last == -1) {  handle_error(1, "Could not fork"); }
-     else if (fork_last == 0 && last != NULL) {
-		     execute_simple_command(last, s);
-     }
-     else {
-       waitpid(fork_last, &exit_status_last, 0);
-       exit((WIFEXITED(exit_status_last) && WEXITSTATUS(exit_status_last)) == EXIT_SUCCESS ? EXIT_SUCCESS : EXIT_FAILURE);
-     }
-   } else { // shell process
-     if(!async) {
-       //printf("\nwaiting for %d\n", ret_fork);
-       waitpid(ret_fork, &child_exit_status, 0);
-       //printf("\nwaited for %d, ret : %d\n", ret_fork, child_exit_status);
-       shell_set_special_var(s, "?", child_exit_status == 0 ? "0" : "1");
-     }
-   }
- }
+void execute_pipeline_list(pipeline_list* pl, shell* s) {
+  pipeline* p = pipeline_list_get_next_pipeline(pl);
+  if(pl->pipelines->size == 1 && p->simple_commands->size == 1){
+    simple_command* sc = pipeline_get_next_simple_command(p);
+    if(strlen(sc->name) == 0) { // it's a varibale assignment for the current shell
+      dictionary* sc_assignment_dic = dictionnary_from_string_array(sc->env_assignements, '=', sc->nb_assignments);
+      dictionary_entry* de = NULL;
+      for(int i = 0; i < sc->nb_assignments; i++){
+        de = (dictionary_entry*)((list_item*)list_get_next(sc_assignment_dic->entries))->data;
+        shell_set_user_var(s, de->key, de->value);
+      }
 
- void execute_pipeline_list(pipeline_list* pl, shell* s) {
-   pipeline* p = pipeline_list_get_next_pipeline(pl);
+      return;
+    } else {
+      list_reinit_iteration(p->simple_commands);
+    }
+  }
 
-   if(pl->pipelines->size == 1 && p->simple_commands->size == 1){
-     simple_command* sc = pipeline_get_next_simple_command(p);
-     if(strlen(sc->name) == 0) { // it's a varibale assignment for the current shell
-       dictionary* sc_assignment_dic = dictionnary_from_string_array(sc->env_assignements, '=', sc->nb_assignments);
-       dictionary_entry* de = NULL;
-       for(int i = 0; i < sc->nb_assignments; i++){
-         de = (dictionary_entry*)((list_item*)list_get_next(sc_assignment_dic->entries))->data;
-         shell_set_user_var(s, de->key, de->value);
-       }
+  pipeline* previous_p = NULL;
+  char* exit_status_previous = NULL;
+  char exit_code_var[2] = "?";
 
-       return;
-     } else {
-       list_reinit_iteration(p->simple_commands);
-     }
-   }
-
-   pipeline* previous_p = NULL;
-   char* exit_status_previous = NULL;
-   char exit_code_var[2] = "?";
-
-   for(int i=0; i< pl->pipelines->size; i++){
-     if(previous_p != NULL){
-       if(previous_p->terminating_token == SEPARATOR || previous_p->terminating_token == ASYNC) {
-         execute_pipeline(p, p->terminating_token == ASYNC, s);
-       } else { // AND, OR
-         exit_status_previous = shell_get_special_variable(s, exit_code_var);
-         if(exit_status_previous != NULL && (
-           (previous_p->terminating_token == AND && exit_status_previous[0] == '0') ||
-           (previous_p->terminating_token == OR && exit_status_previous[0] != '0')
-         )){
-           execute_pipeline(p, 0, s);
-         }
-       }
-       exit_status_previous = shell_get_special_variable(s, exit_code_var);
-     } else {
-       execute_pipeline(p, p->terminating_token == ASYNC, s);
-     }
-     previous_p = p;
-     p = pipeline_list_get_next_pipeline(pl);
-   }
+  for(int i=0; i< pl->pipelines->size; i++){
+    if(previous_p != NULL){
+      if(previous_p->terminating_token == SEPARATOR || previous_p->terminating_token == ASYNC) {
+        execute_pipeline(p, p->terminating_token == ASYNC, s);
+      } else { // AND, OR
+        exit_status_previous = shell_get_special_variable(s, exit_code_var);
+        if(exit_status_previous != NULL && (
+          (previous_p->terminating_token == AND && exit_status_previous[0] == '0') ||
+          (previous_p->terminating_token == OR && exit_status_previous[0] != '0')
+        )){
+          execute_pipeline(p, 0, s);
+        }
+      }
+      exit_status_previous = shell_get_special_variable(s, exit_code_var);
+    } else {
+      execute_pipeline(p, p->terminating_token == ASYNC, s);
+    }
+    previous_p = p;
+    p = pipeline_list_get_next_pipeline(pl);
+  }
 }
 
 void make_env_for_child(simple_command* sc, shell* s) {
@@ -178,12 +181,13 @@ void make_env_for_child(simple_command* sc, shell* s) {
 }
 
 void execute_simple_command(simple_command* sc, shell* s) {
+	if(execute_if_builtin(sc,s)){
+		return;
+	}
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
     make_env_for_child(sc, s);
-    if(!execute_if_builtin(sc, s)){
-      handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "Execution error ");
-    }
+    handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "Execution error ");
   } else {
     handle_error(1, "Invalid command...");
   }
