@@ -18,7 +18,7 @@
 
 int execute_if_builtin(simple_command* sc, shell* s){
   if(strcmp(sc->name, "exit") == 0){
-    exit(1);
+    kill(0,9);
     return 1;
   } else if(strcmp(sc->name, "cd") == 0){
     chdir(sc->argv[1]);

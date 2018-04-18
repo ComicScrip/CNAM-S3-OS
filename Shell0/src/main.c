@@ -44,11 +44,7 @@ int main(int argc, char** argv, char** env)
     //pipeline_list* pl = pipeline_list_from_string("ls -ali /home");
     //pipeline_list* pl = pipeline_list_from_string("TEST=42 /home/scrip/DATA/CNAM/CNAM-S3-OS/Shell0/printenv | grep TEST");
     user_input = get_usr_input(s);
-    log_command_in_history(HISTORY_FILE, user_input);
-    if(strcmp(user_input, "exit\n") == 0){
-		exit(1);
-		return 1;
-	}	
+    log_command_in_history(HISTORY_FILE, user_input);	
     pipeline_list* pl = pipeline_list_from_string(user_input);
     execute_pipeline_list(pl, s);
     pipeline_list_destroy(pl);
