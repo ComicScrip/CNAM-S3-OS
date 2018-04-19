@@ -1,0 +1,17 @@
+make gcov
+ls -ali /home
+ls -ali /home | grep tom
+echo "hello" > test.txt
+echo "world" >> test.txt
+<test.txt cat | grep "hello"
+ls ; echo "ok"
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+rm test.txt
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+./sleep &
+exit
+
+bin/Shell0 -c "TEST=43 ./printenv | grep TEST"
+
+
+

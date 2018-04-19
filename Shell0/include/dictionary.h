@@ -4,7 +4,7 @@
 #include "../include/list.h"
 
 /**
- * @defgroup shell0_dictionnary
+ * @defgroup dictionnary
  * This module is reponsible for defing a <string, string> dictonnary structure and its operations
  *
  * @{

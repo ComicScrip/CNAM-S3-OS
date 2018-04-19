@@ -43,3 +43,104 @@ ls
 echo
 echo
 ls -aloi
+echo lol >> test
+pwd
+pwd
+echo test
+pwd >> test
+ls
+exit
+ls 
+ls $
+ls 
+exit
+ls -ali > testfile /home ; grep tom < testfile && echo ok 
+ls -ali /home
+mkdir newdir
+echo "voici les builtin" && pwd && cd newdir && pwd
+cat < testfile && rm -r newdir
+ls -ali >> testfile /home/tom
+ls -ali /home/tom | sort -nr && echo "affichage trié"
+TEST=42 /home/tom/DATA/CNAM/CNAM-S3-OS/Shell0/printenv | grep TEST
+exit
+exit
+TEST=42 /home/tom/Bureau/dernierCommitPierre/CNAM-S3-OS/Shell0/printenv | grep TEST
+ls -ali > testfile /home ; tom scrip < testfile && echo ok
+ls -ali > testfile /home ; tom < testfile && echo ok
+ls -ali > testfile /home ; grep tom < testfile && echo ok
+ls- ali /home
+ls -ali /home
+mkdir newdir
+echo voici les builtin && pwd && cd newdir && pwd 
+cat < testfile && rm -r newdir
+ls -ali >> testfile /home/tom
+ls -ali /home/tom |  sort -nr && echo affichage fichiers triés !
+exit
+ls newdir 2>&1 >> err.txt
+ls newdir >> err.txt 2>&1
+ls -ali > testfile /home ; grep tom < testfile && echo ok
+TEST=42
+TEST=42
+./printenv
+./printenv | grep TEST
+TEST=43 /home/tom/Bureau/dernierCommitPierre/CNAM-S3-OS/Shell0/printenv | grep TEST
+TEST=43 /home/tom/Bureau/dernierCommitPierre/CNAM-S3-OS/Shell0/printenv | grep TEST
+TEST=43 /home/tom/Bureau/dernierCommitPierre/CNAM-S3-OS/Shell0/printenv | grep TEST
+TEST=43 ./printenv | grep TEST
+ls
+ls -ali /home | grep tom
+cd /home/tom
+</home/tom/.bashrc cat | grep PATH 
+</home/tom/.bashrc cat
+echo "hello" > test.txt
+<test.txt cat | grep "hello"
+echo "world" >> test.txt
+<test.txt cat | grep "hello"
+cat test.txt
+ls ; echo "ok"
+ls | grep bin && echo "bin is here"
+ls | grep bin >/dev/null && echo "bin is here"
+
+
+
+
+
+
+clear
+ls | grep bin >>/dev/null && echo "bin is here"
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+rm test.txt
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+ls &
+ls &
+ls
+sleep 5
+sleep 5 ; echo "ok"
+sleep 5; echo "ok" &
+./sleep &
+ls -ali /homels -ali /homels -ali /homels -ali /homels -ali /home
+ls -ali /home | grep tom
+echo "hello" > test.txt
+echo "world" >> test.txt
+<test.txt cat | grep "hello"
+ls ; echo "ok"
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+rm test.txt
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+./sleep &
+TEST=43 ./printenv | grep TEST
+TEST=43 ./printenv | grep TEST
+TEST=43 ./printenv | grep TEST
+TEST=43 ./printenv | grep TEST
+ls -ali /home
+ls -ali /home | grep tom
+echo "hello" > test.txt
+echo "world" >> test.txt
+<test.txt cat | grep "hello"
+ls ; echo "ok"
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+rm test.txt
+ls | grep test.txt >>/dev/null && echo "test.txt is here" || echo "test.txt not in folder"
+./sleep &
+exit
+ls -ali /homeTEST=43 ./printenv | grep TESTTEST=43 ./printenv | grep TEST

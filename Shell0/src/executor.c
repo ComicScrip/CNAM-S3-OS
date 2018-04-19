@@ -181,9 +181,16 @@ void make_env_for_child(simple_command* sc, shell* s) {
 }
 
 void execute_simple_command(simple_command* sc, shell* s) {
-	if(execute_if_builtin(sc,s)){
-		return;
-	}
+  //apply_redirections(sc);
+  //if(!execute_if_builtin(sc,s)){
+	 //if(strlen(sc->name) > 0){
+		//make_env_for_child(sc, s);
+		//handle_error(execvpe(sc->name, sc->argv, sc->env_assignements) == -1, "Execution error ");
+	  //} else {
+		//handle_error(1, "Invalid command...");
+	  //}  
+ // }
+ 
   apply_redirections(sc);
   if(strlen(sc->name) > 0){
     make_env_for_child(sc, s);
